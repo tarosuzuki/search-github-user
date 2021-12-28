@@ -1,28 +1,38 @@
 package com.example.searchgithubuser
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
+
+
+private fun searchUsers(keyword: String, viewModel: SearchUsersViewModel) {
+    viewModel.clearUserList()
+    viewModel.fetchUserList(keyword)
+}
+
+private fun selectUser(userName: String, viewModel: SearchUsersViewModel) {
+    viewModel.clearUserInfo()
+    viewModel.clearRepositoryList()
+    viewModel.fetchUserInfo(userName)
+    viewModel.fetchRepositoryList(userName)
+}
 
 
 @Composable
@@ -30,19 +40,14 @@ fun SearchUsersScreen(searchUsersViewModel: SearchUsersViewModel = viewModel()) 
     val userList by searchUsersViewModel.userList.collectAsState()
 
     Column {
-        inputKeywordBox(searchUsersViewModel)
-        searchResultUserList(userList)
+        InputKeywordBox(searchUsersViewModel)
+        SearchResultUserList(userList, searchUsersViewModel)
     }
 }
 
-private fun searchUsers(keyword: String, viewModel: SearchUsersViewModel) {
-    viewModel.clearUserList()
-    viewModel.fetchUserList(keyword)
-}
-
 @Composable
-fun inputKeywordBox(viewModel: SearchUsersViewModel) {
-    var text = rememberSaveable { mutableStateOf("")}
+fun InputKeywordBox(viewModel: SearchUsersViewModel) {
+    val text = rememberSaveable { mutableStateOf("")}
     val focusManager = LocalFocusManager.current
 
     Column {
@@ -70,8 +75,10 @@ fun inputKeywordBox(viewModel: SearchUsersViewModel) {
 }
 
 @Composable
-fun userCard(userInfo: GitHubUser) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+fun UserCard(userInfo: GitHubUser, viewModel: SearchUsersViewModel) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable { selectUser(userInfo.login, viewModel) }) {
         Image(
             painter = rememberImagePainter(userInfo.avatar_url),
             contentDescription = null,
@@ -84,9 +91,9 @@ fun userCard(userInfo: GitHubUser) {
 }
 
 @Composable
-fun searchResultUserList(userList: List<GitHubUser>) {
+fun SearchResultUserList(userList: List<GitHubUser>, viewModel: SearchUsersViewModel) {
     userList.forEach {
-        userCard(it)
+        UserCard(it, viewModel)
     }
 }
 

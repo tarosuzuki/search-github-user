@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.searchgithubuser.ui.theme.SearchGithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -20,21 +19,12 @@ class MainActivity : ComponentActivity() {
             SearchGithubUsersTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    SearchUsersScreen()
+                    //SearchUsersScreen()
+                    UserInfoScreen()
                     //Greeting("Android")
                 }
             }
         }
-        //apiTest()
-    }
-}
-
-fun apiTest() {
-    val gitHubService = CloudGitHubService()
-    runBlocking {
-        //gitHubService.getUsers("taro in:login")
-        //gitHubService.getUserInfo("taro-0")
-        gitHubService.getRepositoryInfo("tarosuzuki")
     }
 }
 

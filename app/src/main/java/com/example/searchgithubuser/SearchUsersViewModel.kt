@@ -1,6 +1,5 @@
 package com.example.searchgithubuser
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +16,18 @@ class SearchUsersViewModel @Inject constructor(
 
     private val _userList = MutableStateFlow<List<GitHubUser>>(listOf())
     val userList: StateFlow<List<GitHubUser>> = _userList
+    private val _userInfo = MutableStateFlow<GitHubUserInfo?>(null)
+    val userInfo: StateFlow<GitHubUserInfo?> = _userInfo
+    private val _repositoryList = MutableStateFlow<List<GitHubRepositoryInfo>>(listOf())
+    val repositoryList: StateFlow<List<GitHubRepositoryInfo>> = _repositoryList
     private var fetchUsersJob: Job? = null
+    private var fetchUserInfoJob: Job? = null
+    private var fetchRepositoriesJob: Job? = null
+
+    init {
+        fetchUserInfo("taro-0")
+        fetchRepositoryList("taro-0")
+    }
 
     fun fetchUserList(keyword: String) {
         val searchQuery = "$keyword in:login"
@@ -34,5 +44,37 @@ class SearchUsersViewModel @Inject constructor(
 
     fun clearUserList() {
         _userList.value = listOf()
+    }
+
+    fun fetchUserInfo(userName: String) {
+        fetchUserInfoJob?.cancel()
+        fetchUserInfoJob = viewModelScope.launch {
+            val result = gitHubService.getUserInfo(userName)
+            if (result.isSuccess) {
+                result.getOrNull()?.let {
+                    _userInfo.value = it
+                }
+            }
+        }
+    }
+
+    fun clearUserInfo() {
+        _userInfo.value = null
+    }
+
+    fun fetchRepositoryList(userName: String) {
+        fetchRepositoriesJob?.cancel()
+        fetchRepositoriesJob = viewModelScope.launch {
+            val result = gitHubService.getRepositoryInfo(userName)
+            if (result.isSuccess) {
+                result.getOrNull()?.let {
+                    _repositoryList.value = it
+                }
+            }
+        }
+    }
+
+    fun clearRepositoryList() {
+        _repositoryList.value = listOf()
     }
 }

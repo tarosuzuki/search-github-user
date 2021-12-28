@@ -14,7 +14,8 @@ data class GitHubRepositoryInfo (
     val language: String,
     val stargazers_count: Int,
     val description: String,
-    val fork: Boolean)
+    val fork: Boolean,
+    val html_url: String)
 
 interface GitHubService {
     suspend fun getUsers (keyword: String) : Result<List<GitHubUser>>

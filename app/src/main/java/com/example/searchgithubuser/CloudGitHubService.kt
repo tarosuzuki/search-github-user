@@ -50,6 +50,4 @@ class CloudGitHubService : GitHubService {
     companion object {
         private const val TAG = "CloudGitHubService"
     }
-
-
 }
