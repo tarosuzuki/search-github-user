@@ -14,18 +14,37 @@ class CloudGitHubService : GitHubService {
     private val gitHubApi = retrofit.create(GitHubApi::class.java)
 
     override suspend fun getUsers(keyword: String): Result<List<GitHubUser>> {
-        try {
+        return try {
             val response = gitHubApi.getUsers(keyword)
             Log.i(TAG, "getUsers response : ${response.userList}")
-            return Result.success(response.userList)
+            Result.success(response.userList)
         } catch (e: Exception) {
             Log.e(TAG, "getUsers error : $e")
-            return Result.failure(IllegalStateException("error - $e"))
+            Result.failure(IllegalStateException("error - $e"))
         }
     }
 
     override suspend fun getUserInfo(userName: String): Result<GitHubUserInfo> {
-        TODO("Not yet implemented")
+        return try {
+            val response = gitHubApi.getUserInfo(userName)
+            Log.i(TAG, "getUser response : $response")
+            Result.success(response)
+        } catch (e: Exception) {
+            Log.e(TAG, "getUser error : $e")
+            Result.failure(IllegalStateException("error - $e"))
+        }
+    }
+
+    override suspend fun getRepositoryInfo (userName: String) : Result<List<GitHubRepositoryInfo>> {
+        return try {
+            val response = gitHubApi.getRepositoryInfo(userName)
+            val notForkedRepositories = response.filter { !it.fork }
+            Log.i(TAG, "getRepositoryInfo response : $notForkedRepositories")
+            Result.success(notForkedRepositories)
+        } catch (e: Exception) {
+            Log.e(TAG, "getRepositoryInfo error : $e")
+            Result.failure(IllegalStateException("error - $e"))
+        }
     }
 
     companion object {

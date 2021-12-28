@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Search Github Users</string>
+    <string name="search_box_text">Input GitHub user name</string>
+    <string name="input_text_box_label">user name</string>
 </resources>
