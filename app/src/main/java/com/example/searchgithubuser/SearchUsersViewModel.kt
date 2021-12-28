@@ -14,6 +14,8 @@ class SearchUsersViewModel @Inject constructor(
     private val gitHubService : GitHubService
 ) : ViewModel() {
 
+    private val _searchKeyword = MutableStateFlow("")
+    val searchKeyword : StateFlow<String> = _searchKeyword
     private val _userList = MutableStateFlow<List<GitHubUser>>(listOf())
     val userList: StateFlow<List<GitHubUser>> = _userList
     private val _userInfo = MutableStateFlow<GitHubUserInfo?>(null)
@@ -29,7 +31,7 @@ class SearchUsersViewModel @Inject constructor(
         fetchRepositoryList("taro-0")
     }
 
-    fun fetchUserList(keyword: String) {
+    private fun fetchUserList(keyword: String) {
         val searchQuery = "$keyword in:login"
         fetchUsersJob?.cancel()
         fetchUsersJob = viewModelScope.launch {
@@ -42,11 +44,11 @@ class SearchUsersViewModel @Inject constructor(
         }
     }
 
-    fun clearUserList() {
+    private fun clearUserList() {
         _userList.value = listOf()
     }
 
-    fun fetchUserInfo(userName: String) {
+    private fun fetchUserInfo(userName: String) {
         fetchUserInfoJob?.cancel()
         fetchUserInfoJob = viewModelScope.launch {
             val result = gitHubService.getUserInfo(userName)
@@ -58,11 +60,11 @@ class SearchUsersViewModel @Inject constructor(
         }
     }
 
-    fun clearUserInfo() {
+    private fun clearUserInfo() {
         _userInfo.value = null
     }
 
-    fun fetchRepositoryList(userName: String) {
+    private fun fetchRepositoryList(userName: String) {
         fetchRepositoriesJob?.cancel()
         fetchRepositoriesJob = viewModelScope.launch {
             val result = gitHubService.getRepositoryInfo(userName)
@@ -74,7 +76,26 @@ class SearchUsersViewModel @Inject constructor(
         }
     }
 
-    fun clearRepositoryList() {
+    private fun clearRepositoryList() {
         _repositoryList.value = listOf()
+    }
+
+    fun setSearchKeyword(keyword: String) {
+        _searchKeyword.value = keyword
+    }
+
+    fun searchUsers() {
+        val userName = _searchKeyword.value
+        if (userName.isNotEmpty()) {
+            clearUserList()
+            fetchUserList(userName)
+        }
+    }
+
+    fun selectUser(userName: String) {
+        clearUserInfo()
+        clearRepositoryList()
+        fetchUserInfo(userName)
+        fetchRepositoryList(userName)
     }
 }

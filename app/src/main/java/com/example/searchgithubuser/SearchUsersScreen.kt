@@ -18,36 +18,34 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
 
 
-private fun searchUsers(keyword: String, viewModel: SearchUsersViewModel) {
-    viewModel.clearUserList()
-    viewModel.fetchUserList(keyword)
-}
-
-private fun selectUser(userName: String, viewModel: SearchUsersViewModel) {
-    viewModel.clearUserInfo()
-    viewModel.clearRepositoryList()
-    viewModel.fetchUserInfo(userName)
-    viewModel.fetchRepositoryList(userName)
-}
-
-
 @Composable
-fun SearchUsersScreen(searchUsersViewModel: SearchUsersViewModel = viewModel()) {
-    val userList by searchUsersViewModel.userList.collectAsState()
+fun SearchUsersScreen(viewModel: SearchUsersViewModel = hiltViewModel<SearchUsersViewModel>(),
+                      onSearchKeywordValueChange: (String) -> Unit = {},
+                      onClickSearch: () -> Unit = {},
+                      onClickUserList: (String) -> Unit = {}) {
+
+    val userList by viewModel.userList.collectAsState()
 
     Column {
-        InputKeywordBox(searchUsersViewModel)
-        SearchResultUserList(userList, searchUsersViewModel)
+        InputKeywordBox(
+            viewModel,
+            onSearchKeywordValueChange,
+            onClickSearch
+        )
+        SearchResultUserList(userList, viewModel, onClickUserList)
     }
 }
 
 @Composable
-fun InputKeywordBox(viewModel: SearchUsersViewModel) {
-    val text = rememberSaveable { mutableStateOf("")}
+fun InputKeywordBox(viewModel: SearchUsersViewModel,
+                    onSearchKeywordValueChange: (String) -> Unit = {},
+                    onClickSearch: () -> Unit = {}) {
+    val keywordText by viewModel.searchKeyword.collectAsState()
     val focusManager = LocalFocusManager.current
 
     Column {
@@ -59,15 +57,15 @@ fun InputKeywordBox(viewModel: SearchUsersViewModel) {
             modifier = Modifier.width(450.dp)
         )
         OutlinedTextField(
-            value = text.value,
-            onValueChange = { text.value = it },
+            value = keywordText,
+            onValueChange = { onSearchKeywordValueChange(it) },
             label = { Text(stringResource(R.string.input_text_box_label),) },
             maxLines = 1,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
                 onSearch = {
                     focusManager.clearFocus()
-                    searchUsers(text.value, viewModel)
+                    onClickSearch()
                 }
             )
         )
@@ -75,10 +73,12 @@ fun InputKeywordBox(viewModel: SearchUsersViewModel) {
 }
 
 @Composable
-fun UserCard(userInfo: GitHubUser, viewModel: SearchUsersViewModel) {
+fun UserCard(userInfo: GitHubUser,
+             viewModel: SearchUsersViewModel,
+             onClickUserList: (String) -> Unit = {}) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { selectUser(userInfo.login, viewModel) }) {
+        modifier = Modifier.clickable { onClickUserList(userInfo.login) }) {
         Image(
             painter = rememberImagePainter(userInfo.avatar_url),
             contentDescription = null,
@@ -91,9 +91,11 @@ fun UserCard(userInfo: GitHubUser, viewModel: SearchUsersViewModel) {
 }
 
 @Composable
-fun SearchResultUserList(userList: List<GitHubUser>, viewModel: SearchUsersViewModel) {
+fun SearchResultUserList(userList: List<GitHubUser>,
+                         viewModel: SearchUsersViewModel,
+                         onClickUserList: (String) -> Unit = {}) {
     userList.forEach {
-        UserCard(it, viewModel)
+        UserCard(it, viewModel, onClickUserList)
     }
 }
 

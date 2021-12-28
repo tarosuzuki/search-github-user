@@ -1,7 +1,5 @@
 package com.example.searchgithubuser
 
-import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,22 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
-import androidx.browser.customtabs.CustomTabsIntent
-import com.example.searchgithubuser.SearchGitHubUserApplication.Companion.appContext
-
-
-private fun launchRepositoryPage(url: String){
-    val builder = CustomTabsIntent.Builder()
-    val customTabsIntent = builder.build()
-    customTabsIntent.launchUrl(appContext, Uri.parse(url))
-}
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun UserInfoScreen(searchUsersViewModel: SearchUsersViewModel = viewModel()) {
-    val userInfo by searchUsersViewModel.userInfo.collectAsState()
-    val repositoryList by searchUsersViewModel.repositoryList.collectAsState()
+fun UserInfoScreen(viewModel: SearchUsersViewModel = hiltViewModel(),
+                   onClickRepositoryList: (String) -> Unit = {}) {
+    val userInfo by viewModel.userInfo.collectAsState()
+    val repositoryList by viewModel.repositoryList.collectAsState()
 
     Column {
         Text(
@@ -50,7 +40,7 @@ fun UserInfoScreen(searchUsersViewModel: SearchUsersViewModel = viewModel()) {
             fontSize = 30.sp,
             textAlign = TextAlign.Center
         )
-        RepositoriesInfo(repositoryList)
+        RepositoriesInfo(repositoryList, onClickRepositoryList)
     }
 }
 
@@ -82,14 +72,14 @@ fun UserProfile(userInfo: GitHubUserInfo) {
 }
 
 @Composable
-fun RepositoriesInfo(repositoryList: List<GitHubRepositoryInfo>) {
+fun RepositoriesInfo(repositoryList: List<GitHubRepositoryInfo>,
+                     onClickRepositoryList: (String) -> Unit = {}) {
     repositoryList.forEach {
         LazyColumn {
             items(repositoryList) { repository ->
                 Column(
                     modifier = Modifier.clickable {
-                        Log.i("test", "@@@ click repository : ${repository.name}")
-                        launchRepositoryPage(repository.html_url)
+                        onClickRepositoryList(repository.html_url)
                     }
                 ) {
                     Text(it.name, fontWeight = FontWeight.Bold)
