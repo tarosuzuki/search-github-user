@@ -1,5 +1,7 @@
 package com.example.searchgithubuser
 
+import com.example.searchgithubuser.model.github.CloudGitHubService
+import com.example.searchgithubuser.model.github.GitHubService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
