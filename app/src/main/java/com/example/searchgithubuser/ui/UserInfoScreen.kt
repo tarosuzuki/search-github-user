@@ -28,6 +28,7 @@ fun UserInfoScreen(viewModel: SearchUsersViewModel = hiltViewModel(),
     val userInfo by viewModel.userInfo.collectAsState()
     val repositoryList by viewModel.repositoryList.collectAsState()
 
+
     Column {
         Text(
             stringResource(R.string.user_profile_text),
@@ -61,7 +62,9 @@ fun UserProfile(userInfo: GitHubUserInfo) {
         }
         Row(verticalAlignment = Alignment.CenterVertically){
             Text(stringResource(R.string.user_profile_fullname))
-            Text(userInfo.name, fontWeight = FontWeight.Bold)
+            if(userInfo.name != null) {
+                Text(userInfo.name, fontWeight = FontWeight.Bold)
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically){
             Text(stringResource(R.string.user_profile_followers))
@@ -77,7 +80,7 @@ fun UserProfile(userInfo: GitHubUserInfo) {
 @Composable
 fun RepositoriesInfo(repositoryList: List<GitHubRepositoryInfo>,
                      onClickRepositoryList: (String) -> Unit = {}) {
-    repositoryList.forEach {
+    repositoryList.forEach { _ ->
         LazyColumn {
             items(repositoryList) { repository ->
                 Column(
@@ -85,16 +88,20 @@ fun RepositoriesInfo(repositoryList: List<GitHubRepositoryInfo>,
                         onClickRepositoryList(repository.html_url)
                     }
                 ) {
-                    Text(it.name, fontWeight = FontWeight.Bold)
-                    Row(verticalAlignment = Alignment.CenterVertically){
-                        Text(stringResource(R.string.user_profile_repository_language))
-                        Text(it.language, fontWeight = FontWeight.Bold)
+                    Text(repository.name, fontWeight = FontWeight.Bold)
+                    if (repository.language != null ) {
+                        Row(verticalAlignment = Alignment.CenterVertically){
+                                Text(stringResource(R.string.user_profile_repository_language))
+                                Text(repository.language, fontWeight = FontWeight.Bold)
+                        }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically){
                         Text(stringResource(R.string.user_profile_repository_star))
-                        Text(it.stargazers_count.toString(), fontWeight = FontWeight.Bold)
+                        Text(repository.stargazers_count.toString(), fontWeight = FontWeight.Bold)
                     }
-                    Text(it.description)
+                    if (repository.description != null ) {
+                        Text(repository.description)
+                    }
                     Spacer(Modifier.height(30.dp))
                 }
 

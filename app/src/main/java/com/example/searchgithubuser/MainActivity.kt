@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -25,25 +26,25 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    private val viewModel by viewModels<SearchUsersViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SearchGitHubUserApp()
+            SearchGitHubUserApp(viewModel)
         }
     }
 }
 
 @Composable
-fun SearchGitHubUserApp() {
+fun SearchGitHubUserApp(viewModel : SearchUsersViewModel) {
     SearchGithubUsersTheme {
         val navController = rememberNavController()
 
         Scaffold(
             topBar = { Text("Search GitHub Users App") }
         ) {
-            SearchGitHubUsersNavHost(navController, modifier = Modifier.padding(it))
+            SearchGitHubUsersNavHost(navController, modifier = Modifier.padding(it), viewModel)
         }
     }
 }
@@ -61,14 +62,15 @@ private fun launchRepositoryPage(url: String){
 
 
 @Composable
-fun SearchGitHubUsersNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+fun SearchGitHubUsersNavHost(navController: NavHostController,
+                             modifier: Modifier = Modifier,
+                             viewModel: SearchUsersViewModel) {
     NavHost(
         navController = navController,
         startDestination = SearchGitHubUsersScreen.Search.name,
         modifier = modifier
     ) {
         composable(SearchGitHubUsersScreen.Search.name) {
-            val viewModel: SearchUsersViewModel = hiltViewModel()
             SearchUsersScreen(
                 viewModel = viewModel,
                 onSearchKeywordValueChange ={ keyword ->
@@ -82,7 +84,6 @@ fun SearchGitHubUsersNavHost(navController: NavHostController, modifier: Modifie
             )
         }
         composable(SearchGitHubUsersScreen.UserInfo.name) {
-            val viewModel: SearchUsersViewModel = hiltViewModel()
             UserInfoScreen(
                 viewModel = viewModel,
                 onClickRepositoryList = { repositoryUrl ->

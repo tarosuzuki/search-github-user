@@ -1,6 +1,7 @@
 package com.example.searchgithubuser.di
 
 import com.example.searchgithubuser.model.github.CloudGitHubService
+import com.example.searchgithubuser.model.github.FakeGitHubService
 import com.example.searchgithubuser.model.github.GitHubService
 import dagger.Module
 import dagger.Provides
