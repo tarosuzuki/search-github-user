@@ -4,14 +4,31 @@ import android.util.Log
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.IllegalStateException
+import okhttp3.OkHttpClient
 
 class CloudGitHubService : GitHubService {
-    /* ToDo : replace URL with string */
-    private val retrofit = Retrofit.Builder().apply {
-        baseUrl("https://api.github.com/")
-        addConverterFactory(GsonConverterFactory.create())
-    }.build()
-    private val gitHubApi = retrofit.create(GitHubApi::class.java)
+    private var gitHubApi: GitHubApi
+
+    init {
+        val gitHubApiUserName = BuildConfig.GITHUB_API_USERNAME
+        val gitHubApiAccessToken = BuildConfig.GITHUB_API_ACCESS_TOKEN
+        val retrofit = if (gitHubApiUserName.isNotEmpty() && gitHubApiAccessToken.isNotEmpty()) {
+            val client = OkHttpClient.Builder()
+                .addInterceptor(BasicAuthInterceptor(gitHubApiUserName, gitHubApiAccessToken))
+                .build()
+            Retrofit.Builder().apply {
+                baseUrl(gitHubEndpoint)
+                addConverterFactory(GsonConverterFactory.create())
+                client(client)
+            }.build()
+        } else {
+            Retrofit.Builder().apply {
+                baseUrl(gitHubEndpoint)
+                addConverterFactory(GsonConverterFactory.create())
+            }.build()
+        }
+        gitHubApi = retrofit.create(GitHubApi::class.java)
+    }
 
     override suspend fun getUsers(keyword: String): Result<List<GitHubUser>> {
         return try {

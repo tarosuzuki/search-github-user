@@ -10,7 +10,7 @@ import dagger.hilt.components.SingletonComponent
 object AppModule {
     @Provides
     fun provideGitHubService() : GitHubService {
-        return FakeGitHubService()
-        //return CloudGitHubService()
+        //return FakeGitHubService()
+        return CloudGitHubService()
     }
 }

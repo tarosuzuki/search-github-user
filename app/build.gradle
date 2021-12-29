@@ -19,6 +19,9 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField "String", "GITHUB_API_USERNAME", "\"${project.property("gitHubApiUserName")}\""
+        buildConfigField "String", "GITHUB_API_ACCESS_TOKEN", "\"${project.property("gitHubApiAccessToken")}\""
     }
 
     buildTypes {

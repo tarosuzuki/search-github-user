@@ -26,11 +26,6 @@ class SearchUsersViewModel @Inject constructor(
     private var fetchUserInfoJob: Job? = null
     private var fetchRepositoriesJob: Job? = null
 
-    init {
-        fetchUserInfo("taro-0")
-        fetchRepositoryList("taro-0")
-    }
-
     private fun fetchUserList(keyword: String) {
         val searchQuery = "$keyword in:login"
         fetchUsersJob?.cancel()
