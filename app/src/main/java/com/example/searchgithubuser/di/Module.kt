@@ -1,4 +1,4 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.di
 
 import com.example.searchgithubuser.model.github.CloudGitHubService
 import com.example.searchgithubuser.model.github.GitHubService

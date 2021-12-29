@@ -1,7 +1,11 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.searchgithubuser.model.github.GitHubRepositoryInfo
+import com.example.searchgithubuser.model.github.GitHubService
+import com.example.searchgithubuser.model.github.GitHubUser
+import com.example.searchgithubuser.model.github.GitHubUserInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

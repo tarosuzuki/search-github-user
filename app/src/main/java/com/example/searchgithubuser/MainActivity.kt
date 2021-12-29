@@ -5,23 +5,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.searchgithubuser.SearchGitHubUserApplication.Companion.appContext
+import com.example.searchgithubuser.ui.SearchUsersScreen
+import com.example.searchgithubuser.ui.SearchUsersViewModel
+import com.example.searchgithubuser.ui.UserInfoScreen
 import com.example.searchgithubuser.ui.theme.SearchGithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
 

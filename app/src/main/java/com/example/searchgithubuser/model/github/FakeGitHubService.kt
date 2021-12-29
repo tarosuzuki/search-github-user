@@ -1,4 +1,4 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.model.github
 
 class FakeGitHubService : GitHubService {
     override suspend fun getUsers(keyword: String): Result<List<GitHubUser>> {

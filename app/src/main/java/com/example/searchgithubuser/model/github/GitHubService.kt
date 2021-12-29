@@ -1,4 +1,4 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.model.github
 
 data class GitHubUser (val login: String, val avatar_url: String)
 

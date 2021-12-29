@@ -1,4 +1,4 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -8,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -19,12 +18,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
+import com.example.searchgithubuser.R
+import com.example.searchgithubuser.model.github.GitHubUser
 
 
 @Composable
-fun SearchUsersScreen(viewModel: SearchUsersViewModel = hiltViewModel<SearchUsersViewModel>(),
+fun SearchUsersScreen(viewModel: SearchUsersViewModel = hiltViewModel(),
                       onSearchKeywordValueChange: (String) -> Unit = {},
                       onClickSearch: () -> Unit = {},
                       onClickUserList: (String) -> Unit = {}) {
@@ -98,4 +98,3 @@ fun SearchResultUserList(userList: List<GitHubUser>,
         UserCard(it, viewModel, onClickUserList)
     }
 }
-

@@ -1,6 +1,7 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.model.github
 
 import android.util.Log
+import com.example.searchgithubuser.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.IllegalStateException

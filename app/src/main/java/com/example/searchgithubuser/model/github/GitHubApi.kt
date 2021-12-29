@@ -1,4 +1,4 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.model.github
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.GET

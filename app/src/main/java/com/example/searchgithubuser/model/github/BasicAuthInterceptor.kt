@@ -1,4 +1,4 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.model.github
 
 import okhttp3.Credentials
 import okhttp3.Interceptor
