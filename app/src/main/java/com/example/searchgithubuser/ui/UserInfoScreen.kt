@@ -87,30 +87,28 @@ fun RepositoriesInfo(
     repositoryList: List<GitHubRepositoryInfo>,
     onClickRepositoryList: (String) -> Unit = {}
 ) {
-    repositoryList.forEach { _ ->
-        LazyColumn {
-            items(repositoryList) { repository ->
-                Column(
-                    modifier = Modifier.clickable {
-                        onClickRepositoryList(repository.html_url)
-                    }
-                ) {
-                    Text(repository.name, fontWeight = FontWeight.Bold)
-                    if (repository.language != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(R.string.user_profile_repository_language))
-                            Text(repository.language, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.user_profile_repository_star))
-                        Text(repository.stargazers_count.toString(), fontWeight = FontWeight.Bold)
-                    }
-                    if (repository.description != null) {
-                        Text(repository.description)
-                    }
-                    Spacer(Modifier.height(30.dp))
+    LazyColumn {
+        items(repositoryList) { repository ->
+            Column(
+                modifier = Modifier.clickable {
+                    onClickRepositoryList(repository.html_url)
                 }
+            ) {
+                Text(repository.name, fontWeight = FontWeight.Bold)
+                if (repository.language != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.user_profile_repository_language))
+                        Text(repository.language, fontWeight = FontWeight.Bold)
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.user_profile_repository_star))
+                    Text(repository.stargazers_count.toString(), fontWeight = FontWeight.Bold)
+                }
+                if (repository.description != null) {
+                    Text(repository.description)
+                }
+                Spacer(Modifier.height(30.dp))
             }
         }
     }
