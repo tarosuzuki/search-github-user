@@ -1,5 +1,6 @@
 package com.example.searchgithubuser
 
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -33,6 +34,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private fun launchRepositoryPage(url: String) {
+    val builder = CustomTabsIntent.Builder()
+    val customTabsIntent = builder.build()
+    customTabsIntent.intent.flags = FLAG_ACTIVITY_NEW_TASK
+    customTabsIntent.launchUrl(appContext, Uri.parse(url))
+}
+
 @Composable
 fun SearchGitHubUserApp() {
     SearchGithubUsersTheme {
@@ -44,12 +52,6 @@ fun SearchGitHubUserApp() {
             SearchGitHubUsersNavHost(navController, modifier = Modifier.padding(it))
         }
     }
-}
-
-private fun launchRepositoryPage(url: String) {
-    val builder = CustomTabsIntent.Builder()
-    val customTabsIntent = builder.build()
-    customTabsIntent.launchUrl(appContext, Uri.parse(url))
 }
 
 @Composable
