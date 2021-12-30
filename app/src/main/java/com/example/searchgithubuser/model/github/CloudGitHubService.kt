@@ -2,10 +2,10 @@ package com.example.searchgithubuser.model.github
 
 import android.util.Log
 import com.example.searchgithubuser.BuildConfig
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.IllegalStateException
-import okhttp3.OkHttpClient
 
 class CloudGitHubService : GitHubService {
     private var gitHubApi: GitHubApi
@@ -53,7 +53,7 @@ class CloudGitHubService : GitHubService {
         }
     }
 
-    override suspend fun getRepositoryInfo (userName: String) : Result<List<GitHubRepositoryInfo>> {
+    override suspend fun getRepositoryInfo(userName: String): Result<List<GitHubRepositoryInfo>> {
         return try {
             val response = gitHubApi.getRepositoryInfo(userName)
             val notForkedRepositories = response.filter { !it.fork }

@@ -5,7 +5,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
 
-class BasicAuthInterceptor (user: String, password: String) : Interceptor {
+class BasicAuthInterceptor(user: String, password: String) : Interceptor {
     private val credentials: String = Credentials.basic(user, password)
 
     @Throws(IOException::class)

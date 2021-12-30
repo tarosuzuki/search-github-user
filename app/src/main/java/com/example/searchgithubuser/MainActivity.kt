@@ -23,7 +23,6 @@ import com.example.searchgithubuser.ui.UserInfoScreen
 import com.example.searchgithubuser.ui.theme.SearchGithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,16 +46,17 @@ fun SearchGitHubUserApp() {
     }
 }
 
-private fun launchRepositoryPage(url: String){
+private fun launchRepositoryPage(url: String) {
     val builder = CustomTabsIntent.Builder()
     val customTabsIntent = builder.build()
     customTabsIntent.launchUrl(appContext, Uri.parse(url))
 }
 
-
 @Composable
-fun SearchGitHubUsersNavHost(navController: NavHostController,
-                             modifier: Modifier = Modifier) {
+fun SearchGitHubUsersNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         navController = navController,
         startDestination = SearchGitHubUsersScreen.Search.name,

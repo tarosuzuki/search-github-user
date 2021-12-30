@@ -21,7 +21,7 @@ class FakeGitHubService : GitHubService {
         return Result.success(fakeResponse)
     }
 
-    override suspend fun getRepositoryInfo (userName: String) : Result<List<GitHubRepositoryInfo>> {
+    override suspend fun getRepositoryInfo(userName: String): Result<List<GitHubRepositoryInfo>> {
         val fakeResponse = listOf(
             GitHubRepositoryInfo(
                 name = "AboveBeneath",
@@ -54,6 +54,4 @@ class FakeGitHubService : GitHubService {
     companion object {
         private const val TAG = "FakeGitHubService"
     }
-
-
 }

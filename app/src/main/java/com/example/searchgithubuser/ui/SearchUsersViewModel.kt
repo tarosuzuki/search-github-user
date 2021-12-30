@@ -15,11 +15,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchUsersViewModel @Inject constructor(
-    private val gitHubService : GitHubService
+    private val gitHubService: GitHubService
 ) : ViewModel() {
 
     private val _searchKeyword = MutableStateFlow("")
-    val searchKeyword : StateFlow<String> = _searchKeyword
+    val searchKeyword: StateFlow<String> = _searchKeyword
     private val _userList = MutableStateFlow<List<GitHubUser>>(listOf())
     val userList: StateFlow<List<GitHubUser>> = _userList
     private val _userInfo = MutableStateFlow<GitHubUserInfo?>(null)

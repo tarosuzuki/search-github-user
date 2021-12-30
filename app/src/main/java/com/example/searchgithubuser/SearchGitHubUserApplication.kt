@@ -8,7 +8,7 @@ import dagger.hilt.android.HiltAndroidApp
 class SearchGitHubUserApplication : Application() {
 
     companion object {
-      lateinit var appContext: Context
+        lateinit var appContext: Context
     }
 
     override fun onCreate() {

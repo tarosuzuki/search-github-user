@@ -5,7 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-data class GitHubUserList (
+data class GitHubUserList(
     @SerializedName("items")
     val userList: List<GitHubUser>
 )

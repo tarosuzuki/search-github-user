@@ -2,12 +2,17 @@ package com.example.searchgithubuser.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -21,10 +26,11 @@ import coil.compose.rememberImagePainter
 import com.example.searchgithubuser.R
 import com.example.searchgithubuser.model.github.GitHubUser
 
-
 @Composable
-fun SearchUsersScreen(viewModel: SearchUsersViewModel = hiltViewModel(),
-                      onClickUserList: (String) -> Unit = {}) {
+fun SearchUsersScreen(
+    viewModel: SearchUsersViewModel = hiltViewModel(),
+    onClickUserList: (String) -> Unit = {}
+) {
 
     val userList by viewModel.userList.collectAsState()
     val keywordText by viewModel.searchKeyword.collectAsState()
@@ -48,11 +54,13 @@ fun SearchUsersScreen(viewModel: SearchUsersViewModel = hiltViewModel(),
 }
 
 @Composable
-fun InputKeywordBox(keywordText: String,
-                    onSearchKeywordValueChange: (String) -> Unit = {},
-                    onClickSearch: () -> Unit = {}) {
+fun InputKeywordBox(
+    keywordText: String,
+    onSearchKeywordValueChange: (String) -> Unit = {},
+    onClickSearch: () -> Unit = {}
+) {
     val focusManager = LocalFocusManager.current
-    Column (
+    Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -64,7 +72,7 @@ fun InputKeywordBox(keywordText: String,
         OutlinedTextField(
             value = keywordText,
             onValueChange = { onSearchKeywordValueChange(it) },
-            label = { Text(stringResource(R.string.input_text_box_label),) },
+            label = { Text(stringResource(R.string.input_text_box_label)) },
             maxLines = 1,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
@@ -78,14 +86,17 @@ fun InputKeywordBox(keywordText: String,
 }
 
 @Composable
-fun SearchResultUserList(userList: List<GitHubUser>,
-                         onClickUserList: (String) -> Unit = {}) {
+fun SearchResultUserList(
+    userList: List<GitHubUser>,
+    onClickUserList: (String) -> Unit = {}
+) {
     userList.forEach { userInfo ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable {
                 onClickUserList(userInfo.login)
-            }) {
+            }
+        ) {
             Image(
                 painter = rememberImagePainter(userInfo.avatar_url),
                 contentDescription = null,
