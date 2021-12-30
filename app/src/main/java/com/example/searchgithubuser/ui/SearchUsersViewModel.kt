@@ -85,8 +85,8 @@ class SearchUsersViewModel @Inject constructor(
 
     fun searchUsers() {
         val userName = _searchKeyword.value
+        clearUserList()
         if (userName.isNotEmpty()) {
-            clearUserList()
             fetchUserList(userName)
         }
     }
