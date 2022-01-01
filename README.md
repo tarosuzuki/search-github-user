@@ -2,7 +2,7 @@
 ## Prerequisites
 This app uses GitHub APIs with Basic Authentication.  
 Please set credentials in [gradle.properties](/app/gradle.properties).  
-(If credentials are not set, app uses GitHub APIs without authentication.
+(If credentials are not set, app uses GitHub APIs without authentication.  
  In this case, it may not work properly due to rate limit of GitHub APIs)
 
 ## Usage
