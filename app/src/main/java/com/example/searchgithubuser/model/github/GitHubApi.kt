@@ -12,7 +12,7 @@ data class GitHubUserList(
 
 interface GitHubApi {
     @GET("search/users")
-    suspend fun getUsers(@Query("q") q: String): GitHubUserList
+    suspend fun searchUsers(@Query("q") q: String): GitHubUserList
 
     @GET("users/{user}")
     suspend fun getUserInfo(@Path("user") user: String): GitHubUserInfo

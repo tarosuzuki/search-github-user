@@ -1,7 +1,7 @@
 package com.example.searchgithubuser.model.github
 
 class FakeGitHubService : GitHubService {
-    override suspend fun getUsers(keyword: String): Result<List<GitHubUser>> {
+    override suspend fun searchUsers(keyword: String): Result<List<GitHubUser>> {
         val fakeResponse = listOf(
             GitHubUser(login = "taro", avatar_url = "https://avatars.githubusercontent.com/u/65880?v=4"),
             GitHubUser(login = "taroxd", avatar_url = "https://avatars.githubusercontent.com/u/6070540?v=4"),

@@ -31,9 +31,9 @@ class CloudGitHubService : GitHubService {
         gitHubApi = retrofit.create(GitHubApi::class.java)
     }
 
-    override suspend fun getUsers(keyword: String): Result<List<GitHubUser>> {
+    override suspend fun searchUsers(keyword: String): Result<List<GitHubUser>> {
         return try {
-            val response = gitHubApi.getUsers(keyword)
+            val response = gitHubApi.searchUsers(keyword)
             Log.i(TAG, "getUsers response : ${response.userList}")
             Result.success(response.userList)
         } catch (e: Exception) {

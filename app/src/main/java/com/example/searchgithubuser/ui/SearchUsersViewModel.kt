@@ -34,7 +34,7 @@ class SearchUsersViewModel @Inject constructor(
         val searchQuery = "$keyword in:login"
         fetchUsersJob?.cancel()
         fetchUsersJob = viewModelScope.launch {
-            val result = gitHubService.getUsers(searchQuery)
+            val result = gitHubService.searchUsers(searchQuery)
             if (result.isSuccess) {
                 result.getOrNull()?.let {
                     _userList.value = it

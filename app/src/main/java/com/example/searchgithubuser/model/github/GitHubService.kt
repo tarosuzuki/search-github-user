@@ -20,7 +20,7 @@ data class GitHubRepositoryInfo(
 )
 
 interface GitHubService {
-    suspend fun getUsers(keyword: String): Result<List<GitHubUser>>
+    suspend fun searchUsers(keyword: String): Result<List<GitHubUser>>
     suspend fun getUserInfo(userName: String): Result<GitHubUserInfo>
     suspend fun getRepositoryInfo(userName: String): Result<List<GitHubRepositoryInfo>>
 }
