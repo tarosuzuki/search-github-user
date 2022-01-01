@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -49,7 +50,6 @@ fun SearchUsersScreen(
             },
             onClickSearch = { viewModel.searchUsers() }
         )
-        Spacer(Modifier.height(12.dp))
         SearchResultUserList(
             userList = userList,
             onClickUserList = { userName ->
@@ -68,7 +68,9 @@ fun InputKeywordBox(
 ) {
     val focusManager = LocalFocusManager.current
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
@@ -92,30 +94,30 @@ fun SearchResultUserList(
     userList: List<GitHubUser>,
     onClickUserList: (String) -> Unit = {}
 ) {
-    LazyColumn {
+    LazyColumn(Modifier.padding(12.dp)) {
         items(userList) { userInfo ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clickable {
-                        onClickUserList(userInfo.login)
-                    }
-            ) {
-                Spacer(Modifier.width(12.dp))
-                Image(
-                    painter = rememberImagePainter(userInfo.avatar_url),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = userInfo.login,
-                        style = MaterialTheme.typography.h6
-                    )
+            Column(
+                modifier = Modifier.clickable {
+                    onClickUserList(userInfo.login)
                 }
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = rememberImagePainter(userInfo.avatar_url),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = userInfo.login,
+                            style = MaterialTheme.typography.h6
+                        )
+                    }
+                }
+                Divider(Modifier.padding(vertical = 8.dp))
             }
         }
     }

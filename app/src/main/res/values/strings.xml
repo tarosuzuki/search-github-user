@@ -5,11 +5,11 @@
     <string name="user_profile_text">Profile</string>
     <string name="user_profile_username">User name : </string>
     <string name="user_profile_fullname">Full name : </string>
-    <string name="user_profile_followers">Followers : </string>
-    <string name="user_profile_following">Following : </string>
+    <string name="user_profile_followers">Followers :\u0020</string>
+    <string name="user_profile_following">Following :\u0020</string>
     <string name="user_profile_repositories_text">Repositories</string>
     <string name="user_profile_repository_name">Name : </string>
-    <string name="user_profile_repository_language">Language : </string>
-    <string name="user_profile_repository_star">Star : </string>
+    <string name="user_profile_repository_language">Language :\u0020</string>
+    <string name="user_profile_repository_star">Star :\u0020</string>
     <string name="user_profile_repository_description">Description : </string>
 </resources>

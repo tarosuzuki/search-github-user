@@ -7,11 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,7 +41,7 @@ fun UserInfoScreen(
 
     Column {
         userInfo?.let { UserProfile(it) }
-        Spacer(Modifier.height(36.dp))
+        Spacer(Modifier.height(24.dp))
         RepositoriesInfo(repositoryList, onClickRepositoryList)
     }
 }
@@ -47,10 +49,11 @@ fun UserInfoScreen(
 @Composable
 fun UserProfile(userInfo: GitHubUserInfo) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(12.dp))
         Image(
             painter = rememberImagePainter(userInfo.avatar_url),
             contentDescription = null,
@@ -85,45 +88,46 @@ fun RepositoriesInfo(
     repositoryList: List<GitHubRepositoryInfo>,
     onClickRepositoryList: (String) -> Unit = {}
 ) {
-    Row {
-        Spacer(Modifier.width(12.dp))
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.user_profile_repositories_text),
-                style = MaterialTheme.typography.h5
-            )
-            Spacer(Modifier.height(12.dp))
-            LazyColumn {
-                items(repositoryList) { repository ->
-                    Column(
-                        modifier = Modifier.clickable {
-                            onClickRepositoryList(repository.html_url)
-                        }
-                    ) {
-                        Text(repository.name, fontWeight = FontWeight.Bold)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.user_profile_repositories_text),
+            style = MaterialTheme.typography.h5
+        )
+        LazyColumn(Modifier.padding(12.dp)) {
+            items(repositoryList) { repository ->
+                Column(
+                    modifier = Modifier.clickable {
+                        onClickRepositoryList(repository.html_url)
+                    }
+                ) {
+                    Text(repository.name, fontWeight = FontWeight.Bold)
+                    Column(modifier = Modifier.padding(horizontal = 4.dp)) {
                         if (repository.language != null) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(stringResource(R.string.user_profile_repository_language))
-                                Text(repository.language, fontWeight = FontWeight.Bold)
+                                Text(repository.language)
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.user_profile_repository_star))
-                            Text(
-                                repository.stargazers_count.toString(),
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text(repository.stargazers_count.toString())
                         }
                         if (repository.description != null) {
-                            Text(repository.description)
+                            Text(
+                                repository.description,
+                                style = MaterialTheme.typography.body2,
+                                fontStyle = FontStyle.Italic
+                                // color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+                            )
                         }
-                        Spacer(Modifier.height(36.dp))
+                        Divider(Modifier.padding(vertical = 8.dp))
                     }
                 }
             }
         }
-        Spacer(Modifier.width(12.dp))
     }
 }
