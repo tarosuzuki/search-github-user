@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -84,7 +85,8 @@ fun InputKeywordBox(
                     focusManager.clearFocus()
                     onClickSearch()
                 }
-            )
+            ),
+            modifier = Modifier.testTag(InputTextFiledForKeywordSearchTag)
         )
     }
 }
@@ -94,12 +96,18 @@ fun SearchResultUserList(
     userList: List<GitHubUser>,
     onClickUserList: (String) -> Unit = {}
 ) {
-    LazyColumn(Modifier.padding(12.dp)) {
+    LazyColumn(
+        Modifier
+            .padding(12.dp)
+            .testTag(SearchUserResultTag)
+    ) {
         items(userList) { userInfo ->
             Column(
-                modifier = Modifier.clickable {
-                    onClickUserList(userInfo.login)
-                }
+                modifier = Modifier
+                    .clickable {
+                        onClickUserList(userInfo.login)
+                    }
+                    .testTag("$SearchUserResultTag-${userInfo.login}")
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
@@ -122,3 +130,6 @@ fun SearchResultUserList(
         }
     }
 }
+
+const val InputTextFiledForKeywordSearchTag = "inputTextFiledForKeywordSearch"
+const val SearchUserResultTag = "searchUserResult"

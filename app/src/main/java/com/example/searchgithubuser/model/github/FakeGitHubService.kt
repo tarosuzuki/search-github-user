@@ -1,28 +1,35 @@
 package com.example.searchgithubuser.model.github
 
+import java.lang.IllegalStateException
+
 class FakeGitHubService : GitHubService {
-    override suspend fun searchUsers(keyword: String): Result<List<GitHubUser>> {
-        val fakeResponse = listOf(
+    var searchUsersInvocations: MutableList<String> = mutableListOf()
+    var searchUsersResults: MutableMap<String, Result<List<GitHubUser>>> = mutableMapOf()
+
+    var getUserInfoInvocations: MutableList<String> = mutableListOf()
+    var getUserInfoResults: MutableMap<String, Result<GitHubUserInfo>> = mutableMapOf()
+
+    var getRepositoryInfoInvocations: MutableList<String> = mutableListOf()
+    var getRepositoryInfoResults: MutableMap<String, Result<List<GitHubRepositoryInfo>>> = mutableMapOf()
+
+    init {
+        val fakeDefaultSearchUsersResponse = listOf(
             GitHubUser(login = "taro", avatar_url = "https://avatars.githubusercontent.com/u/65880?v=4"),
             GitHubUser(login = "taroxd", avatar_url = "https://avatars.githubusercontent.com/u/6070540?v=4"),
             GitHubUser(login = "taro-0", avatar_url = "https://avatars.githubusercontent.com/u/5248306?v=4")
         )
-        return Result.success(fakeResponse)
-    }
+        searchUsersResults["taro in:login"] = Result.success(fakeDefaultSearchUsersResponse)
 
-    override suspend fun getUserInfo(userName: String): Result<GitHubUserInfo> {
-        val fakeResponse = GitHubUserInfo(
+        val fakeDefaultGetUserInfoResponse = GitHubUserInfo(
             avatar_url = "https://avatars.githubusercontent.com/u/5248306?v=4",
             login = "taro-0",
             name = "Estuardo Díaz",
             followers = 52,
             following = 115
         )
-        return Result.success(fakeResponse)
-    }
+        getUserInfoResults["taro-0"] = Result.success(fakeDefaultGetUserInfoResponse)
 
-    override suspend fun getRepositoryInfo(userName: String): Result<List<GitHubRepositoryInfo>> {
-        val fakeResponse = listOf(
+        val fakeDefaultGetUserRepositoryInfoResponse = listOf(
             GitHubRepositoryInfo(
                 name = "AboveBeneath",
                 language = "CSS",
@@ -48,7 +55,25 @@ class FakeGitHubService : GitHubService {
                 html_url = "https://github.com/taro-0/AboveBeneath"
             ),
         )
-        return Result.success(fakeResponse)
+        getRepositoryInfoResults["taro-0"] = Result.success(fakeDefaultGetUserRepositoryInfoResponse)
+    }
+
+    override suspend fun searchUsers(keyword: String): Result<List<GitHubUser>> {
+        searchUsersInvocations.add(keyword)
+        return searchUsersResults[keyword]
+            ?: Result.failure(IllegalStateException("No result for request: $keyword"))
+    }
+
+    override suspend fun getUserInfo(userName: String): Result<GitHubUserInfo> {
+        getUserInfoInvocations.add(userName)
+        return getUserInfoResults[userName]
+            ?: Result.failure(IllegalStateException("No result for request: $userName"))
+    }
+
+    override suspend fun getRepositoryInfo(userName: String): Result<List<GitHubRepositoryInfo>> {
+        getRepositoryInfoInvocations.add(userName)
+        return getRepositoryInfoResults[userName]
+            ?: Result.failure(IllegalStateException("No result for request: $userName"))
     }
 
     companion object {
