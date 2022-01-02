@@ -10,9 +10,10 @@ data class GitHubUserList(
     val userList: List<GitHubUser>
 )
 
+/** Retrofit API Declaration for GitHub APIs */
 interface GitHubApi {
     @GET("search/users")
-    suspend fun searchUsers(@Query("q") q: String): GitHubUserList
+    suspend fun searchUsers(@Query("q") query: String): GitHubUserList
 
     @GET("users/{user}")
     suspend fun getUserInfo(@Path("user") user: String): GitHubUserInfo

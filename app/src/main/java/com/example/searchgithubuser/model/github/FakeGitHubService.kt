@@ -2,14 +2,21 @@ package com.example.searchgithubuser.model.github
 
 import java.lang.IllegalStateException
 
+/** Fake module of [GitHubService]. */
 class FakeGitHubService : GitHubService {
+    /** Invocations of [searchUsers] */
     var searchUsersInvocations: MutableList<String> = mutableListOf()
+    /** Results of invocations of [searchUsers], represented as map of input parameter to returned value */
     var searchUsersResults: MutableMap<String, Result<List<GitHubUser>>> = mutableMapOf()
 
+    /** Invocations of [getUserInfo] */
     var getUserInfoInvocations: MutableList<String> = mutableListOf()
+    /** Results of invocations of [getUserInfo], represented as map of input parameter to returned value */
     var getUserInfoResults: MutableMap<String, Result<GitHubUserInfo>> = mutableMapOf()
 
+    /** Invocations of [getRepositoryInfo] */
     var getRepositoryInfoInvocations: MutableList<String> = mutableListOf()
+    /** Results of invocations of [getRepositoryInfo], represented as map of input parameter to returned value */
     var getRepositoryInfoResults: MutableMap<String, Result<List<GitHubRepositoryInfo>>> = mutableMapOf()
 
     init {
@@ -18,7 +25,7 @@ class FakeGitHubService : GitHubService {
             GitHubUser(login = "taroxd", avatar_url = "https://avatars.githubusercontent.com/u/6070540?v=4"),
             GitHubUser(login = "taro-0", avatar_url = "https://avatars.githubusercontent.com/u/5248306?v=4")
         )
-        searchUsersResults["taro in:login"] = Result.success(fakeDefaultSearchUsersResponse)
+        searchUsersResults["taro"] = Result.success(fakeDefaultSearchUsersResponse)
 
         val fakeDefaultGetUserInfoResponse = GitHubUserInfo(
             avatar_url = "https://avatars.githubusercontent.com/u/5248306?v=4",

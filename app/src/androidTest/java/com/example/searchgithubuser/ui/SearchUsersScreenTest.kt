@@ -76,7 +76,7 @@ class SearchUsersScreenTest {
 
     @Test
     fun userInfo_whenUserListIsUpdated_isShown() {
-        gitHubService.searchUsersResults["$searchKeyword in:login"] = Result.success(userList)
+        gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
 
         composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
             .assertDoesNotExist()
@@ -99,12 +99,15 @@ class SearchUsersScreenTest {
 
     @Test
     fun userInfoColumn_whenClicked_invokesOnClickUserList() {
-        gitHubService.searchUsersResults["$searchKeyword in:login"] = Result.success(userList)
+        gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
         viewModel.setSearchKeyword(searchKeyword)
         viewModel.searchUsers()
         composeTestRule.mainClock.advanceTimeBy(500)
         composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
+            .assertExists("Unable to find user info")
+        composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
             .performClick()
+        composeTestRule.mainClock.advanceTimeBy(500)
 
         assertEquals(true, onClickedUserList)
         assertEquals(userName1, selectedUserName)

@@ -5,6 +5,11 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
 
+/**
+ * Retrofit interceptor for GitHub APIs Basic Authentication.
+ * @param user username of Github APIs.
+ * @param password access-token associated with the user.
+ */
 class BasicAuthInterceptor(user: String, password: String) : Interceptor {
     private val credentials: String = Credentials.basic(user, password)
 

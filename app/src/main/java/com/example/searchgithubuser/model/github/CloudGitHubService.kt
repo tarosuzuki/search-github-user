@@ -7,6 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.IllegalStateException
 
+/** Implementation of [GitHubService]. */
 class CloudGitHubService : GitHubService {
     private var gitHubApi: GitHubApi
 
@@ -33,7 +34,8 @@ class CloudGitHubService : GitHubService {
 
     override suspend fun searchUsers(keyword: String): Result<List<GitHubUser>> {
         return try {
-            val response = gitHubApi.searchUsers(keyword)
+            val searchQuery = "$keyword in:login"
+            val response = gitHubApi.searchUsers(searchQuery)
             Log.i(TAG, "getUsers response : ${response.userList}")
             Result.success(response.userList)
         } catch (e: Exception) {
