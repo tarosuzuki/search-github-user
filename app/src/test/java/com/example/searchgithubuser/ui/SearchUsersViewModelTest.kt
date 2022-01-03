@@ -1,0 +1,204 @@
+package com.example.searchgithubuser.ui
+
+// import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.searchgithubuser.model.github.FakeGitHubService
+import com.example.searchgithubuser.model.github.GitHubRepositoryInfo
+import com.example.searchgithubuser.model.github.GitHubUser
+import com.example.searchgithubuser.model.github.GitHubUserInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Before
+import org.junit.Test
+import java.lang.IllegalStateException
+
+@ExperimentalCoroutinesApi
+class SearchUsersViewModelTest {
+    /*
+    @Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+     */
+
+    private val testDispatcher = TestCoroutineDispatcher()
+    private lateinit var gitHubService: FakeGitHubService
+    private lateinit var searchUsersViewModel: SearchUsersViewModel
+    private val searchKeyword = "taro"
+    private val userName = "taro-0"
+    private val userList: List<GitHubUser> = listOf(
+        GitHubUser(login = userName, avatar_url = "https://avatars.githubusercontent.com/u/65880?v=4")
+    )
+    private val userInfo = GitHubUserInfo(
+        avatar_url = "https://avatars.githubusercontent.com/u/5248306?v=4",
+        login = "taro-0",
+        name = "Estuardo Díaz",
+        followers = 52,
+        following = 115
+    )
+    private val repositoryInfo = listOf(
+        GitHubRepositoryInfo(
+            name = "AboveBeneath",
+            language = "CSS",
+            stargazers_count = 0,
+            description = "A landing page template with a featured content section and background sounds that change according to the view.",
+            fork = false,
+            html_url = "https://github.com/taro-0/AboveBeneath"
+        )
+    )
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        gitHubService = FakeGitHubService()
+        searchUsersViewModel = SearchUsersViewModel(gitHubService)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun searchKeyword_startAsEmptyString() {
+        assertEquals(true, searchUsersViewModel.searchKeyword.value.isEmpty())
+    }
+
+    @Test
+    fun userList_startAsEmptyList() {
+        assertEquals(true, searchUsersViewModel.userList.value.isEmpty())
+    }
+
+    @Test
+    fun userInfo_startAsNull() {
+        assertEquals(null, searchUsersViewModel.userInfo.value)
+    }
+
+    @Test
+    fun repositoryList_startAsEmptyList() {
+        assertEquals(true, searchUsersViewModel.repositoryList.value.isEmpty())
+    }
+
+    @Test
+    fun setSearchKeyword_updateSearchKeyword() {
+        val keyword1 = "hogehoge"
+        val keyword2 = "fugafuga"
+
+        searchUsersViewModel.setSearchKeyword(keyword1)
+        assertEquals(keyword1, searchUsersViewModel.searchKeyword.value)
+        searchUsersViewModel.setSearchKeyword(keyword2)
+        assertEquals(keyword2, searchUsersViewModel.searchKeyword.value)
+    }
+
+    @Test
+    fun searchUsers_whenSearchKeywordIsNotEmpty_invokesGitHubServiceSearchUsers() {
+        gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+
+        searchUsersViewModel.setSearchKeyword(searchKeyword)
+        searchUsersViewModel.searchUsers()
+
+        assertEquals(listOf(searchKeyword), gitHubService.searchUsersInvocations)
+    }
+
+    @Test
+    fun searchUsers_whenSearchKeywordIsEmpty_notInvokeGitHubServiceSearchUsers() {
+        gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+
+        searchUsersViewModel.setSearchKeyword("")
+        searchUsersViewModel.searchUsers()
+
+        assertNotEquals(listOf(""), gitHubService.searchUsersInvocations)
+    }
+
+    @Test
+    fun searchUsers_whenGitHubServiceSearchUsersReturnSuccess_updatesUserList() {
+        gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+
+        searchUsersViewModel.setSearchKeyword(searchKeyword)
+        searchUsersViewModel.searchUsers()
+
+        assertEquals(userName, searchUsersViewModel.userList.value[0].login)
+    }
+
+    @Test
+    fun searchUsers_whenGitHubServiceSearchUsersReturnFailure_notUpdatesUserList() {
+        gitHubService.searchUsersResults[searchKeyword] = Result.failure(IllegalStateException("some error"))
+
+        searchUsersViewModel.setSearchKeyword(searchKeyword)
+        searchUsersViewModel.searchUsers()
+
+        assertEquals(true, searchUsersViewModel.userList.value.isEmpty())
+    }
+
+    /*
+    @Test
+    fun searchUsers_whenUserListIsNotEmpty_clearsUserList() = testDispatcher.runBlockingTest {
+        gitHubService.searchUsersResults[searchKeyword] = Result.failure(IllegalStateException("some error"))
+
+        searchUsersViewModel.setSearchKeyword(searchKeyword)
+        searchUsersViewModel.searchUsers()
+
+        searchUsersViewModel.userList.test {
+            assertEquals(userList, awaitItem())
+            searchUsersViewModel.searchUsers()
+            assertEquals(listOf<GitHubUser>(), awaitItem())
+            assertEquals(userList, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+     */
+
+    @Test
+    fun selectUser_invokesGitHubServiceGetUserInfoAndGetRepositoryInfo() {
+        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+        searchUsersViewModel.selectUser(userName)
+
+        assertEquals(listOf(userName), gitHubService.getUserInfoInvocations)
+        assertEquals(listOf(userName), gitHubService.getRepositoryInfoInvocations)
+    }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetUserInfoReturnsSuccess_updatesUserInfoAndRepositoryInfo() {
+        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+        searchUsersViewModel.selectUser(userName)
+
+        assertEquals(userInfo, searchUsersViewModel.userInfo.value)
+    }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetUserInfoReturnsFailure_notUpdatesUserInfo() {
+        gitHubService.getUserInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+        searchUsersViewModel.selectUser(userName)
+
+        assertEquals(null, searchUsersViewModel.userInfo.value)
+    }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnsSuccess_updatesRepositoryInfo() {
+        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+        searchUsersViewModel.selectUser(userName)
+
+        assertEquals(repositoryInfo, searchUsersViewModel.repositoryList.value)
+    }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnsFailure_notUpdatesRepositoryInfo() {
+        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+        gitHubService.getRepositoryInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+
+        searchUsersViewModel.selectUser(userName)
+
+        assertEquals(true, searchUsersViewModel.repositoryList.value.isEmpty())
+    }
+}
