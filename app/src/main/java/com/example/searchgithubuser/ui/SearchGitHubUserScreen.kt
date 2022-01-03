@@ -1,4 +1,4 @@
-package com.example.searchgithubuser
+package com.example.searchgithubuser.ui
 
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
@@ -17,9 +17,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.searchgithubuser.SearchGitHubUserApplication.Companion.appContext
-import com.example.searchgithubuser.ui.SearchUsersScreen
-import com.example.searchgithubuser.ui.SearchUsersViewModel
-import com.example.searchgithubuser.ui.UserInfoScreen
 import com.example.searchgithubuser.ui.theme.SearchGithubUsersTheme
 
 enum class SearchGitHubUsersScreen(val screenTitle: String) {
@@ -49,7 +46,8 @@ fun SearchGitHubUserApp() {
     SearchGithubUsersTheme {
         val navController = rememberNavController()
         val backstackEntry = navController.currentBackStackEntryAsState()
-        val currentScreen = SearchGitHubUsersScreen.fromRoute(backstackEntry.value?.destination?.route)
+        val currentScreen =
+            SearchGitHubUsersScreen.fromRoute(backstackEntry.value?.destination?.route)
 
         Scaffold(
             topBar = {
