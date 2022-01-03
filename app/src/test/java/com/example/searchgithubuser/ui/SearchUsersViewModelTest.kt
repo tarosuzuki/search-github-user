@@ -1,6 +1,7 @@
 package com.example.searchgithubuser.ui
 
-// import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import app.cash.turbine.test
+import com.example.searchgithubuser.model.dispatcher.TestDefaultDispatcherImpl
 import com.example.searchgithubuser.model.github.FakeGitHubService
 import com.example.searchgithubuser.model.github.GitHubRepositoryInfo
 import com.example.searchgithubuser.model.github.GitHubUser
@@ -9,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -19,11 +21,6 @@ import java.lang.IllegalStateException
 
 @ExperimentalCoroutinesApi
 class SearchUsersViewModelTest {
-    /*
-    @Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-     */
-
     private val testDispatcher = TestCoroutineDispatcher()
     private lateinit var gitHubService: FakeGitHubService
     private lateinit var searchUsersViewModel: SearchUsersViewModel
@@ -54,7 +51,10 @@ class SearchUsersViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         gitHubService = FakeGitHubService()
-        searchUsersViewModel = SearchUsersViewModel(gitHubService)
+        searchUsersViewModel = SearchUsersViewModel(
+            gitHubService,
+            TestDefaultDispatcherImpl(testDispatcher)
+        )
     }
 
     @After
@@ -133,23 +133,21 @@ class SearchUsersViewModelTest {
         assertEquals(true, searchUsersViewModel.userList.value.isEmpty())
     }
 
-    /*
     @Test
-    fun searchUsers_whenUserListIsNotEmpty_clearsUserList() = testDispatcher.runBlockingTest {
-        gitHubService.searchUsersResults[searchKeyword] = Result.failure(IllegalStateException("some error"))
+    fun searchUsers_whenUserListIsNotEmpty_clearsUserList() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
 
-        searchUsersViewModel.setSearchKeyword(searchKeyword)
-        searchUsersViewModel.searchUsers()
-
-        searchUsersViewModel.userList.test {
-            assertEquals(userList, awaitItem())
+            searchUsersViewModel.setSearchKeyword(searchKeyword)
             searchUsersViewModel.searchUsers()
-            assertEquals(listOf<GitHubUser>(), awaitItem())
-            assertEquals(userList, awaitItem())
-            cancelAndIgnoreRemainingEvents()
+
+            searchUsersViewModel.userList.test {
+                assertEquals(userList, awaitItem())
+                searchUsersViewModel.searchUsers()
+                assertEquals(listOf<GitHubUser>(), awaitItem())
+                assertEquals(userList, awaitItem())
+            }
         }
-    }
-     */
 
     @Test
     fun selectUser_invokesGitHubServiceGetUserInfoAndGetRepositoryInfo() {
@@ -201,4 +199,36 @@ class SearchUsersViewModelTest {
 
         assertEquals(true, searchUsersViewModel.repositoryList.value.isEmpty())
     }
+
+    @Test
+    fun selectUser_whenPreviousUserInfoIsSet_clearsPreviousUserInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+            searchUsersViewModel.selectUser(userName)
+
+            searchUsersViewModel.userInfo.test {
+                assertEquals(userInfo, awaitItem())
+                searchUsersViewModel.selectUser(userName)
+                assertEquals(null, awaitItem())
+                assertEquals(userInfo, awaitItem())
+            }
+        }
+
+    @Test
+    fun selectUser_whenPreviousRepositoryInfoIsSet_clearsPreviousRepositoryInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+            searchUsersViewModel.selectUser(userName)
+
+            searchUsersViewModel.repositoryList.test {
+                assertEquals(repositoryInfo, awaitItem())
+                searchUsersViewModel.selectUser(userName)
+                assertEquals(listOf<GitHubRepositoryInfo>(), awaitItem())
+                assertEquals(repositoryInfo, awaitItem())
+            }
+        }
 }

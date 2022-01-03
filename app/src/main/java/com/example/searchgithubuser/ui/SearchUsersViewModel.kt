@@ -2,6 +2,7 @@ package com.example.searchgithubuser.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.searchgithubuser.model.dispatcher.DefaultDispatcher
 import com.example.searchgithubuser.model.github.GitHubRepositoryInfo
 import com.example.searchgithubuser.model.github.GitHubService
 import com.example.searchgithubuser.model.github.GitHubUser
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchUsersViewModel @Inject constructor(
-    private val gitHubService: GitHubService
+    private val gitHubService: GitHubService,
+    private val defaultDispatcher: DefaultDispatcher
 ) : ViewModel() {
 
     private val _searchKeyword = MutableStateFlow("")
@@ -32,7 +34,7 @@ class SearchUsersViewModel @Inject constructor(
 
     private fun fetchUserList(keyword: String) {
         fetchUsersJob?.cancel()
-        fetchUsersJob = viewModelScope.launch {
+        fetchUsersJob = viewModelScope.launch(defaultDispatcher.dispatcher) {
             val result = gitHubService.searchUsers(keyword)
             if (result.isSuccess) {
                 result.getOrNull()?.let {
@@ -48,7 +50,7 @@ class SearchUsersViewModel @Inject constructor(
 
     private fun fetchUserInfo(userName: String) {
         fetchUserInfoJob?.cancel()
-        fetchUserInfoJob = viewModelScope.launch {
+        fetchUserInfoJob = viewModelScope.launch(defaultDispatcher.dispatcher) {
             val result = gitHubService.getUserInfo(userName)
             if (result.isSuccess) {
                 result.getOrNull()?.let {
@@ -64,7 +66,7 @@ class SearchUsersViewModel @Inject constructor(
 
     private fun fetchRepositoryList(userName: String) {
         fetchRepositoriesJob?.cancel()
-        fetchRepositoriesJob = viewModelScope.launch {
+        fetchRepositoriesJob = viewModelScope.launch(defaultDispatcher.dispatcher) {
             val result = gitHubService.getRepositoryInfo(userName)
             if (result.isSuccess) {
                 result.getOrNull()?.let {
