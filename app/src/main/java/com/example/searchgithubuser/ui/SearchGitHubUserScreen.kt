@@ -55,24 +55,32 @@ fun SearchGitHubUserApp() {
 
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text(currentScreen.screenTitle) },
-                    navigationIcon = {
-                        if (navController.previousBackStackEntry != null) {
-                            IconButton(onClick = { navController.navigateUp() }) {
-                                Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
-                                    contentDescription = "Back Button"
-                                )
-                            }
-                        }
-                    }
+                SearchGitHubUsersTopAppBar(
+                    title = currentScreen.screenTitle,
+                    onBackClick = { navController.navigateUp() }
                 )
             }
         ) {
             SearchGitHubUsersNavHost(navController, modifier = Modifier.padding(it))
         }
     }
+}
+
+@Composable
+fun SearchGitHubUsersTopAppBar(title: String, onBackClick: () -> Unit) {
+    TopAppBar(
+        title = { Text(title) },
+        navigationIcon = {
+            if (title == SearchGitHubUsersScreen.UserInfo.screenTitle) {
+                IconButton(onClick = { onBackClick() }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back Button"
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable
