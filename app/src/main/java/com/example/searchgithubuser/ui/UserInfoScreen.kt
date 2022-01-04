@@ -34,17 +34,29 @@ import com.example.searchgithubuser.model.github.GitHubUserInfo
 @Composable
 fun UserInfoScreen(
     viewModel: SearchUsersViewModel = hiltViewModel(),
-    onClickRepositoryList: (String) -> Unit = {}
+    onClickRepositoryList: (String) -> Unit = {},
+    onDismissErrorModal: () -> Unit = {}
 ) {
     val userInfo by viewModel.userInfo.collectAsState()
     val repositoryList by viewModel.repositoryList.collectAsState()
     val showLoadingIconUserInfo by viewModel.isLoadingUserInfo.collectAsState()
     val showLoadingIconRepositoryInfo by viewModel.isLoadingRepositoryInfo.collectAsState()
+    val showErrorModal by viewModel.isVisibleErrorModal.collectAsState()
+    val errorFactor by viewModel.gitHubApisErrorResponseFactor.collectAsState()
 
     Column {
         UserProfile(userInfo, showLoadingIconUserInfo)
         Spacer(Modifier.height(24.dp))
         RepositoriesInfo(repositoryList, showLoadingIconRepositoryInfo, onClickRepositoryList)
+    }
+
+    if (showErrorModal) {
+        AlertModal(
+            titleText = stringResource(R.string.github_api_response_error_message),
+            descriptionText = errorFactor,
+            onClickOkButton = { onDismissErrorModal() },
+            onDismissRequest = { onDismissErrorModal() }
+        )
     }
 }
 

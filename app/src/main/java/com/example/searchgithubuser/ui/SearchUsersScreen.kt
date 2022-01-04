@@ -42,6 +42,11 @@ fun SearchUsersScreen(
     val userList by viewModel.userList.collectAsState()
     val keywordText by viewModel.searchKeyword.collectAsState()
     val showLoadingIcon by viewModel.isLoadingSearchResult.collectAsState()
+    val showErrorModal by viewModel.isVisibleErrorModal.collectAsState()
+    val errorFactor by viewModel.gitHubApisErrorResponseFactor.collectAsState()
+    val onDismissErrorModal = {
+        viewModel.setIsVisibleErrorModal(false)
+    }
 
     Column {
         InputKeywordBox(
@@ -58,6 +63,15 @@ fun SearchUsersScreen(
                 viewModel.selectUser(userName)
                 onClickUserList(userName)
             }
+        )
+    }
+
+    if (showErrorModal) {
+        AlertModal(
+            titleText = stringResource(R.string.github_api_response_error_message),
+            descriptionText = errorFactor,
+            onClickOkButton = { onDismissErrorModal() },
+            onDismissRequest = { onDismissErrorModal() }
         )
     }
 }

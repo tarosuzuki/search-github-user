@@ -111,6 +111,11 @@ fun SearchGitHubUsersNavHost(
                 viewModel = viewModel,
                 onClickRepositoryList = { repositoryUrl ->
                     launchRepositoryPage(repositoryUrl)
+                },
+                onDismissErrorModal = {
+                    viewModel.setIsVisibleErrorModal(false)
+                    viewModel.backToSearchScreenDueToError()
+                    navController.navigateUp()
                 }
             )
         }
