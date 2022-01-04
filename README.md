@@ -1,4 +1,4 @@
-# Search GitHub user App (Android)
+# Search GitHub User App (Android)
 ## Prerequisites
 This app uses GitHub APIs with Basic Authentication.  
 Please set credentials in [gradle.properties](/app/gradle.properties).  
