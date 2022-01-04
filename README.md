@@ -19,3 +19,9 @@ Please set credentials in [gradle.properties](/app/gradle.properties).
 1. transit to the GitHub web page when repository in the list is tapped.
 
 <img src="img/app-userinfoscreen.png" width="30%">　<img src="img/app-repositoryinfo.png" width="30%">
+
+## ToDo
+* UI
+  - show loading icon while waiting response from GiHub APIs.
+* Test
+  - instrumentation test for composable UI.
