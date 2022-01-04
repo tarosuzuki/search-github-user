@@ -28,6 +28,12 @@ class SearchUsersViewModel @Inject constructor(
     val userInfo: StateFlow<GitHubUserInfo?> = _userInfo
     private val _repositoryList = MutableStateFlow<List<GitHubRepositoryInfo>>(listOf())
     val repositoryList: StateFlow<List<GitHubRepositoryInfo>> = _repositoryList
+    private val _isLoadingSearchResult = MutableStateFlow<Boolean>(false)
+    val isLoadingSearchResult: StateFlow<Boolean> = _isLoadingSearchResult
+    private val _isLoadingUserInfo = MutableStateFlow<Boolean>(false)
+    val isLoadingUserInfo: StateFlow<Boolean> = _isLoadingUserInfo
+    private val _isLoadingRepositoryInfo = MutableStateFlow<Boolean>(false)
+    val isLoadingRepositoryInfo: StateFlow<Boolean> = _isLoadingRepositoryInfo
     private var fetchUsersJob: Job? = null
     private var fetchUserInfoJob: Job? = null
     private var fetchRepositoriesJob: Job? = null
@@ -35,7 +41,9 @@ class SearchUsersViewModel @Inject constructor(
     private fun fetchUserList(keyword: String) {
         fetchUsersJob?.cancel()
         fetchUsersJob = viewModelScope.launch(defaultDispatcher.dispatcher) {
+            setIsLoadingSearchResult(true)
             val result = gitHubService.searchUsers(keyword)
+            setIsLoadingSearchResult(false)
             if (result.isSuccess) {
                 result.getOrNull()?.let {
                     _userList.value = it
@@ -51,7 +59,9 @@ class SearchUsersViewModel @Inject constructor(
     private fun fetchUserInfo(userName: String) {
         fetchUserInfoJob?.cancel()
         fetchUserInfoJob = viewModelScope.launch(defaultDispatcher.dispatcher) {
+            setIsLoadingUserInfo(true)
             val result = gitHubService.getUserInfo(userName)
+            setIsLoadingUserInfo(false)
             if (result.isSuccess) {
                 result.getOrNull()?.let {
                     _userInfo.value = it
@@ -67,7 +77,9 @@ class SearchUsersViewModel @Inject constructor(
     private fun fetchRepositoryList(userName: String) {
         fetchRepositoriesJob?.cancel()
         fetchRepositoriesJob = viewModelScope.launch(defaultDispatcher.dispatcher) {
+            setIsLoadingRepositoryInfo(true)
             val result = gitHubService.getRepositoryInfo(userName)
+            setIsLoadingRepositoryInfo(false)
             if (result.isSuccess) {
                 result.getOrNull()?.let {
                     _repositoryList.value = it
@@ -78,6 +90,18 @@ class SearchUsersViewModel @Inject constructor(
 
     private fun clearRepositoryList() {
         _repositoryList.value = listOf()
+    }
+
+    private fun setIsLoadingSearchResult(value: Boolean) {
+        _isLoadingSearchResult.value = value
+    }
+
+    private fun setIsLoadingUserInfo(value: Boolean) {
+        _isLoadingUserInfo.value = value
+    }
+
+    private fun setIsLoadingRepositoryInfo(value: Boolean) {
+        _isLoadingRepositoryInfo.value = value
     }
 
     fun setSearchKeyword(keyword: String) {
