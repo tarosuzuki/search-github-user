@@ -4,11 +4,12 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.example.searchgithubuser.model.dispatcher.TestDefaultDispatcher
 import com.example.searchgithubuser.model.github.FakeGitHubService
 import com.example.searchgithubuser.model.github.GitHubUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -25,7 +26,7 @@ class SearchUsersScreenTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var gitHubService: FakeGitHubService
     private lateinit var viewModel: SearchUsersViewModel
     private var onClickedUserList = false
@@ -45,7 +46,10 @@ class SearchUsersScreenTest {
         Dispatchers.setMain(testDispatcher)
 
         gitHubService = FakeGitHubService()
-        viewModel = SearchUsersViewModel(gitHubService)
+        viewModel = SearchUsersViewModel(
+            gitHubService = gitHubService,
+            defaultDispatcher = TestDefaultDispatcher(testDispatcher)
+        )
         onClickedUserList = false
         selectedUserName = null
 
