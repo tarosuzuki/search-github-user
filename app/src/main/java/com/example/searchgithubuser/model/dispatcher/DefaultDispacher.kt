@@ -11,6 +11,4 @@ class DefaultDispatcherImpl : DefaultDispatcher {
     override val dispatcher = Dispatchers.Default
 }
 
-class TestDefaultDispatcherImpl(dispatcher: CoroutineDispatcher) : DefaultDispatcher {
-    override val dispatcher = dispatcher
-}
+class TestDefaultDispatcher(override val dispatcher: CoroutineDispatcher) : DefaultDispatcher

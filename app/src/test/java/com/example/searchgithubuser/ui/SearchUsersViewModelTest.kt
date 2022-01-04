@@ -1,14 +1,14 @@
 package com.example.searchgithubuser.ui
 
 import app.cash.turbine.test
-import com.example.searchgithubuser.model.dispatcher.TestDefaultDispatcherImpl
+import com.example.searchgithubuser.model.dispatcher.TestDefaultDispatcher
 import com.example.searchgithubuser.model.github.FakeGitHubService
 import com.example.searchgithubuser.model.github.GitHubRepositoryInfo
 import com.example.searchgithubuser.model.github.GitHubUser
 import com.example.searchgithubuser.model.github.GitHubUserInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -21,7 +21,7 @@ import java.lang.IllegalStateException
 
 @ExperimentalCoroutinesApi
 class SearchUsersViewModelTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var gitHubService: FakeGitHubService
     private lateinit var searchUsersViewModel: SearchUsersViewModel
     private val searchKeyword = "taro"
@@ -52,8 +52,8 @@ class SearchUsersViewModelTest {
         Dispatchers.setMain(testDispatcher)
         gitHubService = FakeGitHubService()
         searchUsersViewModel = SearchUsersViewModel(
-            gitHubService,
-            TestDefaultDispatcherImpl(testDispatcher)
+            gitHubService = gitHubService,
+            defaultDispatcher = TestDefaultDispatcher(testDispatcher)
         )
     }
 
