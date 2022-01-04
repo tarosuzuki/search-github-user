@@ -82,8 +82,4 @@ class FakeGitHubService : GitHubService {
         return getRepositoryInfoResults[userName]
             ?: Result.failure(IllegalStateException("No result for request: $userName"))
     }
-
-    companion object {
-        private const val TAG = "FakeGitHubService"
-    }
 }
