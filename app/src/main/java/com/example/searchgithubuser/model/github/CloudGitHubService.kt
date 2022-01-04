@@ -3,6 +3,7 @@ package com.example.searchgithubuser.model.github
 import android.util.Log
 import com.example.searchgithubuser.BuildConfig
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.IllegalStateException
@@ -14,21 +15,30 @@ class CloudGitHubService : GitHubService {
     init {
         val gitHubApiUserName = BuildConfig.GITHUB_API_USERNAME
         val gitHubApiAccessToken = BuildConfig.GITHUB_API_ACCESS_TOKEN
-        val retrofit = if (gitHubApiUserName.isNotEmpty() && gitHubApiAccessToken.isNotEmpty()) {
-            val client = OkHttpClient.Builder()
+        val logInterceptor = HttpLoggingInterceptor()
+        if (BuildConfig.DEBUG) {
+            logInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        } else {
+            logInterceptor.level = HttpLoggingInterceptor.Level.BASIC
+        }
+
+        val client = if (gitHubApiUserName.isNotEmpty() && gitHubApiAccessToken.isNotEmpty()) {
+            OkHttpClient.Builder()
+                .addInterceptor(logInterceptor)
                 .addInterceptor(BasicAuthInterceptor(gitHubApiUserName, gitHubApiAccessToken))
                 .build()
-            Retrofit.Builder().apply {
-                baseUrl(gitHubEndpoint)
-                addConverterFactory(GsonConverterFactory.create())
-                client(client)
-            }.build()
         } else {
-            Retrofit.Builder().apply {
-                baseUrl(gitHubEndpoint)
-                addConverterFactory(GsonConverterFactory.create())
-            }.build()
+            OkHttpClient.Builder()
+                .addInterceptor(logInterceptor)
+                .build()
         }
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(gitHubEndpoint)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
+
         gitHubApi = retrofit.create(GitHubApi::class.java)
     }
 

@@ -21,7 +21,8 @@ Please set credentials in [gradle.properties](/app/gradle.properties).
 <img src="img/app-userinfoscreen.png" width="30%">　<img src="img/app-repositoryinfo.png" width="30%">
 
 ## ToDo
-* UI
-  - show loading icon while waiting response from GiHub APIs.
 * Test
   - instrumentation test for composable UI.
+* UI
+  - show loading icon while waiting response from GiHub APIs.
+  - show error modal when GitHub APIs response failure.
