@@ -18,5 +18,4 @@ Please set credentials in [gradle.properties](/app/gradle.properties).
 (name, fullname, number of follwers, number of followings and repository list)
 1. transit to the GitHub web page when repository in the list is tapped.
 
-<img src="img/app-userinfoscreen.png" width="45%">
-<img src="img/app-repositoryinfo.png" width="45%">
+<img src="img/app-userinfoscreen.png" width="45%"> <img src="img/app-repositoryinfo.png" width="45%">
