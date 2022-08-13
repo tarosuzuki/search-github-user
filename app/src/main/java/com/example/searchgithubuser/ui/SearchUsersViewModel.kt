@@ -128,10 +128,6 @@ class SearchUsersViewModel @Inject constructor(
         _isLoadingRepositoryInfo.value = value
     }
 
-    fun setIsVisibleErrorModal(value: Boolean) {
-        _isVisibleErrorModal.value = value
-    }
-
     fun setSearchKeyword(keyword: String) {
         _searchKeyword.value = keyword
     }
@@ -149,6 +145,10 @@ class SearchUsersViewModel @Inject constructor(
         clearRepositoryList()
         fetchUserInfo(userName)
         fetchRepositoryList(userName)
+    }
+
+    fun setIsVisibleErrorModal(value: Boolean) {
+        _isVisibleErrorModal.value = value
     }
 
     fun backToSearchScreenDueToError() {

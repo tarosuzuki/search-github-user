@@ -9,7 +9,9 @@ import com.example.searchgithubuser.model.github.GitHubUserInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -83,6 +85,26 @@ class SearchUsersViewModelTest {
     }
 
     @Test
+    fun isLoadingSearchResult_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isLoadingSearchResult.value)
+    }
+
+    @Test
+    fun isLoadingUserInfo_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isLoadingUserInfo.value)
+    }
+
+    @Test
+    fun isLoadingRepositoryInfo_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isLoadingRepositoryInfo.value)
+    }
+
+    @Test
+    fun isVisibleErrorModal_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isVisibleErrorModal.value)
+    }
+
+    @Test
     fun setSearchKeyword_updateSearchKeyword() {
         val keyword1 = "hogehoge"
         val keyword2 = "fugafuga"
@@ -148,6 +170,36 @@ class SearchUsersViewModelTest {
                 assertEquals(userList, awaitItem())
             }
         }
+
+    // ToDo : verify stateFlow emissions with fast update
+    // https://github.com/Kotlin/kotlinx.coroutines/issues/3143
+    @Test
+    fun searchUsers_setsIsLoadingSearchResult() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+            searchUsersViewModel.setSearchKeyword(searchKeyword)
+
+            searchUsersViewModel.isLoadingSearchResult.test {
+                assertEquals(false, awaitItem())
+                searchUsersViewModel.searchUsers()
+                advanceTimeBy(250)
+                runCurrent()
+                assertEquals(true, awaitItem())
+                advanceTimeBy(300)
+                runCurrent()
+                assertEquals(false, awaitItem())
+            }
+        }
+
+    @Test
+    fun searchUsers_whenGitHubServiceSearchUsersReturnFailure_setsIsVisibleErrorModal() {
+        gitHubService.searchUsersResults[searchKeyword] = Result.failure(IllegalStateException("some error"))
+
+        searchUsersViewModel.setSearchKeyword(searchKeyword)
+        searchUsersViewModel.searchUsers()
+
+        assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
+    }
 
     @Test
     fun selectUser_invokesGitHubServiceGetUserInfoAndGetRepositoryInfo() {
@@ -231,4 +283,68 @@ class SearchUsersViewModelTest {
                 assertEquals(repositoryInfo, awaitItem())
             }
         }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetUserInfoReturnFailure_setsIsVisibleErrorModal() {
+        gitHubService.getUserInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+        searchUsersViewModel.selectUser(userName)
+
+        assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
+    }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnFailure_setsIsVisibleErrorModal() {
+        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+        gitHubService.getRepositoryInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+
+        searchUsersViewModel.selectUser(userName)
+
+        assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
+    }
+
+    @Test
+    fun selectUser_setsIsLoadingUserInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+            searchUsersViewModel.isLoadingUserInfo.test {
+                assertEquals(false, awaitItem())
+                searchUsersViewModel.selectUser(userName)
+                advanceTimeBy(250)
+                runCurrent()
+                assertEquals(true, awaitItem())
+                advanceTimeBy(300)
+                runCurrent()
+                assertEquals(false, awaitItem())
+            }
+        }
+
+    @Test
+    fun selectUser_setsIsLoadingRepositoryInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+            searchUsersViewModel.isLoadingRepositoryInfo.test {
+                assertEquals(false, awaitItem())
+                searchUsersViewModel.selectUser(userName)
+                advanceTimeBy(250)
+                runCurrent()
+                assertEquals(true, awaitItem())
+                advanceTimeBy(300)
+                runCurrent()
+                assertEquals(false, awaitItem())
+            }
+        }
+
+    @Test
+    fun setIsVisibleErrorModal_updateValue() {
+        searchUsersViewModel.setIsVisibleErrorModal(true)
+        assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
+        searchUsersViewModel.setIsVisibleErrorModal(false)
+        assertEquals(false, searchUsersViewModel.isVisibleErrorModal.value)
+    }
 }

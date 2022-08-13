@@ -1,5 +1,6 @@
 package com.example.searchgithubuser.model.github
 
+import kotlinx.coroutines.delay
 import java.lang.IllegalStateException
 
 /** Fake module of [GitHubService]. */
@@ -67,18 +68,21 @@ class FakeGitHubService : GitHubService {
 
     override suspend fun searchUsers(keyword: String): Result<List<GitHubUser>> {
         searchUsersInvocations.add(keyword)
+        delay(500)
         return searchUsersResults[keyword]
             ?: Result.failure(IllegalStateException("No result for request: $keyword"))
     }
 
     override suspend fun getUserInfo(userName: String): Result<GitHubUserInfo> {
         getUserInfoInvocations.add(userName)
+        delay(500)
         return getUserInfoResults[userName]
             ?: Result.failure(IllegalStateException("No result for request: $userName"))
     }
 
     override suspend fun getRepositoryInfo(userName: String): Result<List<GitHubRepositoryInfo>> {
         getRepositoryInfoInvocations.add(userName)
+        delay(500)
         return getRepositoryInfoResults[userName]
             ?: Result.failure(IllegalStateException("No result for request: $userName"))
     }
