@@ -39,9 +39,14 @@ fun SearchUsersScreen(
     viewModel: SearchUsersViewModel = hiltViewModel(),
     onClickUserList: (String) -> Unit = {}
 ) {
-
     val userList by viewModel.userList.collectAsState()
     val keywordText by viewModel.searchKeyword.collectAsState()
+    val showLoadingIcon by viewModel.isLoadingSearchResult.collectAsState()
+    val showErrorModal by viewModel.isVisibleErrorModal.collectAsState()
+    val errorFactor by viewModel.gitHubApisErrorResponseFactor.collectAsState()
+    val onDismissErrorModal = {
+        viewModel.setIsVisibleErrorModal(false)
+    }
 
     Column {
         InputKeywordBox(
@@ -53,10 +58,20 @@ fun SearchUsersScreen(
         )
         SearchResultUserList(
             userList = userList,
+            showLoadingIcon = showLoadingIcon,
             onClickUserList = { userName ->
                 viewModel.selectUser(userName)
                 onClickUserList(userName)
             }
+        )
+    }
+
+    if (showErrorModal) {
+        AlertModal(
+            titleText = stringResource(R.string.github_api_response_error_message),
+            descriptionText = errorFactor,
+            onClickOkButton = { onDismissErrorModal() },
+            onDismissRequest = { onDismissErrorModal() }
         )
     }
 }
@@ -94,38 +109,43 @@ fun InputKeywordBox(
 @Composable
 fun SearchResultUserList(
     userList: List<GitHubUser>,
+    showLoadingIcon: Boolean,
     onClickUserList: (String) -> Unit = {}
 ) {
-    LazyColumn(
-        Modifier
-            .padding(12.dp)
-            .testTag(SearchUserResultTag)
-    ) {
-        items(userList) { userInfo ->
-            Column(
-                modifier = Modifier
-                    .clickable {
-                        onClickUserList(userInfo.login)
-                    }
-                    .testTag("$SearchUserResultTag-${userInfo.login}")
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = rememberImagePainter(userInfo.avatar_url),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = userInfo.login,
-                            style = MaterialTheme.typography.h6
+    if (showLoadingIcon) {
+        LoadingIcon()
+    } else {
+        LazyColumn(
+            Modifier
+                .padding(12.dp)
+                .testTag(SearchUserResultTag)
+        ) {
+            items(userList) { userInfo ->
+                Column(
+                    modifier = Modifier
+                        .clickable {
+                            onClickUserList(userInfo.login)
+                        }
+                        .testTag("$SearchUserResultTag-${userInfo.login}")
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = rememberImagePainter(userInfo.avatar_url),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
                         )
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = userInfo.login,
+                                style = MaterialTheme.typography.h6
+                            )
+                        }
                     }
+                    Divider(Modifier.padding(vertical = 8.dp))
                 }
-                Divider(Modifier.padding(vertical = 8.dp))
             }
         }
     }

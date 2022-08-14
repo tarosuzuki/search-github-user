@@ -10,7 +10,11 @@ import com.example.searchgithubuser.model.github.GitHubUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -89,31 +93,65 @@ class SearchUsersScreenTest {
         composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName3")
             .assertDoesNotExist()
 
-        viewModel.setSearchKeyword(searchKeyword)
-        viewModel.searchUsers()
-        composeTestRule.mainClock.advanceTimeBy(500)
+        runTest(testDispatcher) {
+            viewModel.setSearchKeyword(searchKeyword)
+            viewModel.searchUsers()
+            advanceUntilIdle()
+            composeTestRule.mainClock.advanceTimeBy(500)
 
-        composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
-            .assertExists("Unable to find user info")
-        composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName2")
-            .assertExists("Unable to find user info")
-        composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName3")
-            .assertExists("Unable to find user info")
+            composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
+                .assertExists("Unable to find user info")
+            composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName2")
+                .assertExists("Unable to find user info")
+            composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName3")
+                .assertExists("Unable to find user info")
+        }
     }
 
     @Test
-    fun userInfoColumn_whenClicked_invokesOnClickUserList() {
-        gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
-        viewModel.setSearchKeyword(searchKeyword)
-        viewModel.searchUsers()
-        composeTestRule.mainClock.advanceTimeBy(500)
-        composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
-            .assertExists("Unable to find user info")
-        composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
-            .performClick()
-        composeTestRule.mainClock.advanceTimeBy(500)
+    fun userInfoColumn_whenClicked_invokesOnClickUserList() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+            viewModel.setSearchKeyword(searchKeyword)
+            viewModel.searchUsers()
+            advanceUntilIdle()
 
-        assertEquals(true, onClickedUserList)
-        assertEquals(userName1, selectedUserName)
+            composeTestRule.mainClock.advanceTimeBy(500)
+            composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
+                .assertExists("Unable to find user info")
+            composeTestRule.onNodeWithTag("$SearchUserResultTag-$userName1")
+                .performClick()
+            composeTestRule.mainClock.advanceTimeBy(500)
+
+            assertEquals(true, onClickedUserList)
+            assertEquals(userName1, selectedUserName)
+        }
+
+    @Test
+    fun loadingIcon_whenIsLoadingSearchResultIsTrue_isShown() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+            viewModel.setSearchKeyword(searchKeyword)
+            viewModel.searchUsers()
+            advanceTimeBy(250)
+            runCurrent()
+            composeTestRule.mainClock.advanceTimeBy(500)
+            composeTestRule.onNodeWithTag(LoadingIconTag).assertExists()
+
+            advanceTimeBy(300)
+            runCurrent()
+            composeTestRule.mainClock.advanceTimeBy(500)
+            composeTestRule.onNodeWithTag(LoadingIconTag).assertDoesNotExist()
+        }
+
+    @Test
+    fun errorModal_whenShowErrorModalIsTrue_isShown() {
+        viewModel.setIsVisibleErrorModal(true)
+        composeTestRule.mainClock.advanceTimeBy(500)
+        composeTestRule.onNodeWithTag(AlertModalTag).assertExists()
+
+        composeTestRule.onNodeWithTag(AlertModalOkButtonTag).performClick()
+        composeTestRule.mainClock.advanceTimeBy(500)
+        composeTestRule.onNodeWithTag(AlertModalTag).assertDoesNotExist()
     }
 }

@@ -34,51 +34,71 @@ import com.example.searchgithubuser.model.github.GitHubUserInfo
 @Composable
 fun UserInfoScreen(
     viewModel: SearchUsersViewModel = hiltViewModel(),
-    onClickRepositoryList: (String) -> Unit = {}
+    onClickRepositoryList: (String) -> Unit = {},
+    onDismissErrorModal: () -> Unit = {}
 ) {
     val userInfo by viewModel.userInfo.collectAsState()
     val repositoryList by viewModel.repositoryList.collectAsState()
+    val showLoadingIconUserInfo by viewModel.isLoadingUserInfo.collectAsState()
+    val showLoadingIconRepositoryInfo by viewModel.isLoadingRepositoryInfo.collectAsState()
+    val showErrorModal by viewModel.isVisibleErrorModal.collectAsState()
+    val errorFactor by viewModel.gitHubApisErrorResponseFactor.collectAsState()
 
     Column {
-        userInfo?.let { UserProfile(it) }
+        UserProfile(userInfo, showLoadingIconUserInfo)
         Spacer(Modifier.height(24.dp))
-        RepositoriesInfo(repositoryList, onClickRepositoryList)
+        RepositoriesInfo(repositoryList, showLoadingIconRepositoryInfo, onClickRepositoryList)
+    }
+
+    if (showErrorModal) {
+        AlertModal(
+            titleText = stringResource(R.string.github_api_response_error_message),
+            descriptionText = errorFactor,
+            onClickOkButton = { onDismissErrorModal() },
+            onDismissRequest = { onDismissErrorModal() }
+        )
     }
 }
 
 @Composable
-fun UserProfile(userInfo: GitHubUserInfo) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = rememberImagePainter(userInfo.avatar_url),
-            contentDescription = null,
-            modifier = Modifier
-                .size(128.dp)
-                .clip(CircleShape)
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = userInfo.login,
-            style = MaterialTheme.typography.h6
-        )
-        if (userInfo.name != null) {
-            Text(
-                text = "( ${userInfo.name} )",
-                style = MaterialTheme.typography.h6
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.user_profile_followers))
-            Text(userInfo.followers.toString())
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.user_profile_following))
-            Text(userInfo.following.toString())
+fun UserProfile(userInfo: GitHubUserInfo?, showLoadingIcon: Boolean) {
+    if (showLoadingIcon) {
+        LoadingIcon()
+    } else {
+        userInfo?.let {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = rememberImagePainter(userInfo.avatar_url),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(128.dp)
+                        .clip(CircleShape)
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = userInfo.login,
+                    style = MaterialTheme.typography.h6
+                )
+                if (userInfo.name != null) {
+                    Text(
+                        text = "( ${userInfo.name} )",
+                        style = MaterialTheme.typography.h6
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.user_profile_followers))
+                    Text(userInfo.followers.toString())
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.user_profile_following))
+                    Text(userInfo.following.toString())
+                }
+            }
         }
     }
 }
@@ -86,6 +106,7 @@ fun UserProfile(userInfo: GitHubUserInfo) {
 @Composable
 fun RepositoriesInfo(
     repositoryList: List<GitHubRepositoryInfo>,
+    showLoadingIcon: Boolean,
     onClickRepositoryList: (String) -> Unit = {}
 ) {
     Column(
@@ -97,34 +118,38 @@ fun RepositoriesInfo(
             text = stringResource(R.string.user_profile_repositories_text),
             style = MaterialTheme.typography.h5
         )
-        LazyColumn(Modifier.padding(12.dp)) {
-            items(repositoryList) { repository ->
-                Column(
-                    modifier = Modifier.clickable {
-                        onClickRepositoryList(repository.html_url)
-                    }
-                ) {
-                    Text(repository.name, fontWeight = FontWeight.Bold)
-                    Column(modifier = Modifier.padding(horizontal = 4.dp)) {
-                        if (repository.language != null) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(stringResource(R.string.user_profile_repository_language))
-                                Text(repository.language)
+        if (showLoadingIcon) {
+            LoadingIcon()
+        } else {
+            LazyColumn(Modifier.padding(12.dp)) {
+                items(repositoryList) { repository ->
+                    Column(
+                        modifier = Modifier.clickable {
+                            onClickRepositoryList(repository.html_url)
+                        }
+                    ) {
+                        Text(repository.name, fontWeight = FontWeight.Bold)
+                        Column(modifier = Modifier.padding(horizontal = 4.dp)) {
+                            if (repository.language != null) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(stringResource(R.string.user_profile_repository_language))
+                                    Text(repository.language)
+                                }
                             }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(stringResource(R.string.user_profile_repository_star))
+                                Text(repository.stargazers_count.toString())
+                            }
+                            if (repository.description != null) {
+                                Text(
+                                    repository.description,
+                                    style = MaterialTheme.typography.body2,
+                                    fontStyle = FontStyle.Italic
+                                    // color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+                                )
+                            }
+                            Divider(Modifier.padding(vertical = 8.dp))
                         }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(R.string.user_profile_repository_star))
-                            Text(repository.stargazers_count.toString())
-                        }
-                        if (repository.description != null) {
-                            Text(
-                                repository.description,
-                                style = MaterialTheme.typography.body2,
-                                fontStyle = FontStyle.Italic
-                                // color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-                            )
-                        }
-                        Divider(Modifier.padding(vertical = 8.dp))
                     }
                 }
             }

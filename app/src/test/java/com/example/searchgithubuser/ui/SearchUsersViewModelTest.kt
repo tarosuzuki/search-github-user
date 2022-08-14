@@ -9,7 +9,10 @@ import com.example.searchgithubuser.model.github.GitHubUserInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -83,6 +86,26 @@ class SearchUsersViewModelTest {
     }
 
     @Test
+    fun isLoadingSearchResult_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isLoadingSearchResult.value)
+    }
+
+    @Test
+    fun isLoadingUserInfo_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isLoadingUserInfo.value)
+    }
+
+    @Test
+    fun isLoadingRepositoryInfo_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isLoadingRepositoryInfo.value)
+    }
+
+    @Test
+    fun isVisibleErrorModal_startAsFalse() {
+        assertEquals(false, searchUsersViewModel.isVisibleErrorModal.value)
+    }
+
+    @Test
     fun setSearchKeyword_updateSearchKeyword() {
         val keyword1 = "hogehoge"
         val keyword2 = "fugafuga"
@@ -114,24 +137,28 @@ class SearchUsersViewModelTest {
     }
 
     @Test
-    fun searchUsers_whenGitHubServiceSearchUsersReturnSuccess_updatesUserList() {
-        gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+    fun searchUsers_whenGitHubServiceSearchUsersReturnSuccess_updatesUserList() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
 
-        searchUsersViewModel.setSearchKeyword(searchKeyword)
-        searchUsersViewModel.searchUsers()
+            searchUsersViewModel.setSearchKeyword(searchKeyword)
+            searchUsersViewModel.searchUsers()
+            advanceUntilIdle()
 
-        assertEquals(userName, searchUsersViewModel.userList.value[0].login)
-    }
+            assertEquals(userName, searchUsersViewModel.userList.value[0].login)
+        }
 
     @Test
-    fun searchUsers_whenGitHubServiceSearchUsersReturnFailure_notUpdatesUserList() {
-        gitHubService.searchUsersResults[searchKeyword] = Result.failure(IllegalStateException("some error"))
+    fun searchUsers_whenGitHubServiceSearchUsersReturnFailure_notUpdatesUserList() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.failure(IllegalStateException("some error"))
 
-        searchUsersViewModel.setSearchKeyword(searchKeyword)
-        searchUsersViewModel.searchUsers()
+            searchUsersViewModel.setSearchKeyword(searchKeyword)
+            searchUsersViewModel.searchUsers()
+            advanceUntilIdle()
 
-        assertEquals(true, searchUsersViewModel.userList.value.isEmpty())
-    }
+            assertEquals(true, searchUsersViewModel.userList.value.isEmpty())
+        }
 
     @Test
     fun searchUsers_whenUserListIsNotEmpty_clearsUserList() =
@@ -140,6 +167,7 @@ class SearchUsersViewModelTest {
 
             searchUsersViewModel.setSearchKeyword(searchKeyword)
             searchUsersViewModel.searchUsers()
+            advanceUntilIdle()
 
             searchUsersViewModel.userList.test {
                 assertEquals(userList, awaitItem())
@@ -147,6 +175,38 @@ class SearchUsersViewModelTest {
                 assertEquals(listOf<GitHubUser>(), awaitItem())
                 assertEquals(userList, awaitItem())
             }
+        }
+
+    // ToDo : verify stateFlow emissions with fast update
+    // https://github.com/Kotlin/kotlinx.coroutines/issues/3143
+    @Test
+    fun searchUsers_setsIsLoadingSearchResult() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.success(userList)
+            searchUsersViewModel.setSearchKeyword(searchKeyword)
+
+            searchUsersViewModel.isLoadingSearchResult.test {
+                assertEquals(false, awaitItem())
+                searchUsersViewModel.searchUsers()
+                advanceTimeBy(250)
+                runCurrent()
+                assertEquals(true, awaitItem())
+                advanceTimeBy(300)
+                runCurrent()
+                assertEquals(false, awaitItem())
+            }
+        }
+
+    @Test
+    fun searchUsers_whenGitHubServiceSearchUsersReturnFailure_setsIsVisibleErrorModal() =
+        runTest(testDispatcher) {
+            gitHubService.searchUsersResults[searchKeyword] = Result.failure(IllegalStateException("some error"))
+
+            searchUsersViewModel.setSearchKeyword(searchKeyword)
+            searchUsersViewModel.searchUsers()
+            advanceUntilIdle()
+
+            assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
         }
 
     @Test
@@ -161,44 +221,52 @@ class SearchUsersViewModelTest {
     }
 
     @Test
-    fun selectUser_whenGitHubServiceGetUserInfoReturnsSuccess_updatesUserInfoAndRepositoryInfo() {
-        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
-        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+    fun selectUser_whenGitHubServiceGetUserInfoReturnsSuccess_updatesUserInfoAndRepositoryInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
 
-        searchUsersViewModel.selectUser(userName)
+            searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
 
-        assertEquals(userInfo, searchUsersViewModel.userInfo.value)
-    }
-
-    @Test
-    fun selectUser_whenGitHubServiceGetUserInfoReturnsFailure_notUpdatesUserInfo() {
-        gitHubService.getUserInfoResults[userName] = Result.failure(IllegalStateException("some error"))
-        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
-
-        searchUsersViewModel.selectUser(userName)
-
-        assertEquals(null, searchUsersViewModel.userInfo.value)
-    }
+            assertEquals(userInfo, searchUsersViewModel.userInfo.value)
+        }
 
     @Test
-    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnsSuccess_updatesRepositoryInfo() {
-        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
-        gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+    fun selectUser_whenGitHubServiceGetUserInfoReturnsFailure_notUpdatesUserInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
 
-        searchUsersViewModel.selectUser(userName)
+            searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
 
-        assertEquals(repositoryInfo, searchUsersViewModel.repositoryList.value)
-    }
+            assertEquals(null, searchUsersViewModel.userInfo.value)
+        }
 
     @Test
-    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnsFailure_notUpdatesRepositoryInfo() {
-        gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
-        gitHubService.getRepositoryInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnsSuccess_updatesRepositoryInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
 
-        searchUsersViewModel.selectUser(userName)
+            searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
 
-        assertEquals(true, searchUsersViewModel.repositoryList.value.isEmpty())
-    }
+            assertEquals(repositoryInfo, searchUsersViewModel.repositoryList.value)
+        }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnsFailure_notUpdatesRepositoryInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+
+            searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
+
+            assertEquals(true, searchUsersViewModel.repositoryList.value.isEmpty())
+        }
 
     @Test
     fun selectUser_whenPreviousUserInfoIsSet_clearsPreviousUserInfo() =
@@ -207,6 +275,7 @@ class SearchUsersViewModelTest {
             gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
 
             searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
 
             searchUsersViewModel.userInfo.test {
                 assertEquals(userInfo, awaitItem())
@@ -223,6 +292,7 @@ class SearchUsersViewModelTest {
             gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
 
             searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
 
             searchUsersViewModel.repositoryList.test {
                 assertEquals(repositoryInfo, awaitItem())
@@ -231,4 +301,72 @@ class SearchUsersViewModelTest {
                 assertEquals(repositoryInfo, awaitItem())
             }
         }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetUserInfoReturnFailure_setsIsVisibleErrorModal() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+            searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
+
+            assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
+        }
+
+    @Test
+    fun selectUser_whenGitHubServiceGetRepositoryInfoReturnFailure_setsIsVisibleErrorModal() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.failure(IllegalStateException("some error"))
+
+            searchUsersViewModel.selectUser(userName)
+            advanceUntilIdle()
+
+            assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
+        }
+
+    @Test
+    fun selectUser_setsIsLoadingUserInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+            searchUsersViewModel.isLoadingUserInfo.test {
+                assertEquals(false, awaitItem())
+                searchUsersViewModel.selectUser(userName)
+                advanceTimeBy(250)
+                runCurrent()
+                assertEquals(true, awaitItem())
+                advanceTimeBy(300)
+                runCurrent()
+                assertEquals(false, awaitItem())
+            }
+        }
+
+    @Test
+    fun selectUser_setsIsLoadingRepositoryInfo() =
+        runTest(testDispatcher) {
+            gitHubService.getUserInfoResults[userName] = Result.success(userInfo)
+            gitHubService.getRepositoryInfoResults[userName] = Result.success(repositoryInfo)
+
+            searchUsersViewModel.isLoadingRepositoryInfo.test {
+                assertEquals(false, awaitItem())
+                searchUsersViewModel.selectUser(userName)
+                advanceTimeBy(250)
+                runCurrent()
+                assertEquals(true, awaitItem())
+                advanceTimeBy(300)
+                runCurrent()
+                assertEquals(false, awaitItem())
+            }
+        }
+
+    @Test
+    fun setIsVisibleErrorModal_updateValue() {
+        searchUsersViewModel.setIsVisibleErrorModal(true)
+        assertEquals(true, searchUsersViewModel.isVisibleErrorModal.value)
+        searchUsersViewModel.setIsVisibleErrorModal(false)
+        assertEquals(false, searchUsersViewModel.isVisibleErrorModal.value)
+    }
 }
