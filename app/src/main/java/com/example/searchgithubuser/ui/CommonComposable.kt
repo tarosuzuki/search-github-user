@@ -9,13 +9,14 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.example.searchgithubuser.R
 
 @Composable
 fun LoadingIcon() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().testTag(LoadingIconTag),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
@@ -34,11 +35,17 @@ fun AlertModal(
         text = { Text(text = descriptionText) },
         confirmButton = {
             TextButton(
-                onClick = { onClickOkButton() }
+                onClick = { onClickOkButton() },
+                modifier = Modifier.testTag(AlertModalOkButtonTag)
             ) {
                 Text(stringResource(R.string.alert_modal_ok_button))
             }
         },
-        dismissButton = null
+        dismissButton = null,
+        modifier = Modifier.testTag(AlertModalTag)
     )
 }
+
+const val LoadingIconTag = "loadingIcon"
+const val AlertModalTag = "alertModal"
+const val AlertModalOkButtonTag = "alertModalOkButton"
